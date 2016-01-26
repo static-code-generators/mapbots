@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
 	socklen_t client_len;
 
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
-	bzero(&serv_addr, sizeof(serv_addr));
-	bzero(&client_addr, sizeof(client_addr));
+	memset(&serv_addr, 0, sizeof(serv_addr));
+	memset(&client_addr, 0, sizeof(client_addr));
 
 	serv_addr.sin_family = AF_INET; // IPv4 Address
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); // Any incoming address for the machine would do
@@ -72,7 +72,7 @@ void handleClient(int connfd)
 	char filename[20];
 	FILE *outfile;
 	char recvBuff[BUFFSIZE];
-	bzero(recvBuff, sizeof(recvBuff));
+	memset(recvBuff, 0, sizeof(recvBuff));
 
 	while ((readbytes=read(connfd, recvBuff, sizeof(recvBuff))) > 0)
 	{

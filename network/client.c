@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	}
 
 	while (1) {
-		bzero(sendBuff, sizeof(sendBuff));
+		memset(sendBuff, 0, sizeof(sendBuff));
 
 		/* Read the payload contents from stdin */
 		scanf("%d %f", &p.bot_id, &p.reading);
