@@ -1,11 +1,12 @@
 ## Raspi network code
 
 Compile using:
+```bash
+make
+make client # only client
+make server # only server
 ```
-gcc client.c -o client
-gcc server.c -o server
-```
-Then run `./server` on your host machine
+Then do `cd build` and run `./server` on your host machine
 
 From the client run `./client <server-ip>` and write the readings to stdin as:
 ```<bot_id> <reading>```
