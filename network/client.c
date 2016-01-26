@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 
 #include "payload.h"
 
@@ -15,25 +15,25 @@
 
 int main(int argc, char *argv[])
 {
-    int sock = 0;
-    struct sockaddr_in serv_addr; 
+	int sock = 0;
+	struct sockaddr_in serv_addr;
 
-    if(argc != 2)
-    {
-        printf("\n Usage: %s <Server IP address>\n",argv[0]);
-        return -1;
-    } 
-	
-    memset(&serv_addr, '0', sizeof(serv_addr)); 
+	if(argc != 2)
+	{
+		printf("\n Usage: %s <Server IP address>\n",argv[0]);
+		return -1;
+	}
 
-    serv_addr.sin_family = AF_INET; // IPv4 Address
-    serv_addr.sin_port = htons(PORT); 
+	memset(&serv_addr, '0', sizeof(serv_addr));
 
-    if(inet_pton(AF_INET, argv[1], &serv_addr.sin_addr)<=0) //convert IPv4 and IPv6 addresses from text to binary form
-    {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    } 
+	serv_addr.sin_family = AF_INET; // IPv4 Address
+	serv_addr.sin_port = htons(PORT);
+
+	if(inet_pton(AF_INET, argv[1], &serv_addr.sin_addr)<=0) //convert IPv4 and IPv6 addresses from text to binary form
+	{
+		printf("\nInvalid address/ Address not supported \n");
+		return -1;
+	}
 
 	char sendBuff[BUFFSIZE];
 	int sentbytes;
@@ -43,12 +43,12 @@ int main(int argc, char *argv[])
 	{
 		printf("\n Socket creation error \n");
 		return -1;
-	} 
+	}
 	if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 	{
-	   printf("\nConnection Failed \n");
-	   return -1;
-	} 
+		printf("\nConnection Failed \n");
+		return -1;
+	}
 	else {
 		printf("\nConnected.\nPlease enter the bot id and reading\n");
 	}
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	bzero(sendBuff, sizeof(sendBuff));
 
 	/* Read the payload contents from stdin */
-	scanf("%d %f", &p.bot_id, &p.reading);	
+	scanf("%d %f", &p.bot_id, &p.reading);
 	/* Write them to the buffer */
 	snprintf(sendBuff, sizeof(sendBuff), "%d %f", p.bot_id, p.reading);
 	/* Write the buffer to the socket */
@@ -71,5 +71,5 @@ int main(int argc, char *argv[])
 	printf("\nClosing socket\n");
 	close(sock);
 
-    return 0;
+	return 0;
 }
