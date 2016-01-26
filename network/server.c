@@ -14,19 +14,17 @@
 #define PORT 5555
 #define BUFFSIZE 512
 
+void handleClient(int connfd);
+
 int main(int argc, char *argv[])
 {
 	int listenfd = 0, connfd = 0;
 	struct sockaddr_in serv_addr, client_addr;
 	socklen_t client_len;
-	int readbytes = 0;
-
-	char recvBuff[BUFFSIZE];
 
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	bzero(&serv_addr, sizeof(serv_addr));
 	bzero(&client_addr, sizeof(client_addr));
-	bzero(recvBuff, sizeof(recvBuff));
 
 	serv_addr.sin_family = AF_INET; // IPv4 Address
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); // Any incoming address for the machine would do
@@ -38,9 +36,7 @@ int main(int argc, char *argv[])
 
 	printf("\nServer listening for connections!\n");
 
-	struct payload p;
-	char filename[20];
-	FILE *outfile;
+	pid_t pid;
 
 	while(1)
 	{
@@ -51,33 +47,58 @@ int main(int argc, char *argv[])
 				inet_ntoa(client_addr.sin_addr),
 				(int) ntohs(client_addr.sin_port));
 
-		while ((readbytes=read(connfd, recvBuff, sizeof(recvBuff))) > 0)
-		{
-			recvBuff[readbytes] = '\0';
+		pid = fork();
 
-			/* Read the data from buffer into payload */
-			sscanf(recvBuff, "%d %f", &p.bot_id, &p.reading);
-			/* Open a file for writing the readings */
-			sprintf(filename, "bot_%d.csv", p.bot_id);
-			printf("Writing to %s\n", filename);
-			outfile = fopen(filename, "a");
-			/* Write the data */
-			fprintf(outfile, "%d,%f\n", p.bot_id, p.reading);
-			/* Close file */
-			fclose(outfile);
+		if (pid > 0) {
+			/* parent */
+			close(connfd);
+			continue;
 		}
 
-		if(readbytes <= 0)
-		{
-			if (readbytes == 0) {
-				printf("\nClient went away :/");
-				close(connfd);
-			} else {
-				perror("\n Read error \n");
-			}
+		if (pid == 0) {
+			/* child */
+			close(listenfd);
+			handleClient(connfd);
+			break;
 		}
-		printf("\n\n");
 	}
-	close(listenfd);
 	return 0;
+}
+
+void handleClient(int connfd)
+{
+	int readbytes = 0;
+	struct payload p;
+	char filename[20];
+	FILE *outfile;
+	char recvBuff[BUFFSIZE];
+	bzero(recvBuff, sizeof(recvBuff));
+
+	while ((readbytes=read(connfd, recvBuff, sizeof(recvBuff))) > 0)
+	{
+		recvBuff[readbytes] = '\0';
+
+		/* Read the data from buffer into payload */
+		sscanf(recvBuff, "%d %f", &p.bot_id, &p.reading);
+		/* Open a file for writing the readings */
+		sprintf(filename, "bot_%d.csv", p.bot_id);
+		printf("Writing to %s\n", filename);
+		outfile = fopen(filename, "a");
+		/* Write the data */
+		fprintf(outfile, "%d,%f\n", p.bot_id, p.reading);
+		/* Close file */
+		fclose(outfile);
+	}
+
+	if(readbytes <= 0)
+	{
+		if (readbytes == 0) {
+			printf("\nClient went away :/");
+			close(connfd);
+		} else {
+			perror("\n Read error \n");
+		}
+	}
+	printf("\n\n");
+	return;
 }

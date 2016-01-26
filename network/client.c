@@ -53,20 +53,22 @@ int main(int argc, char *argv[])
 		printf("\nConnected.\nPlease enter the bot id and reading\n");
 	}
 
-	bzero(sendBuff, sizeof(sendBuff));
+	while (1) {
+		bzero(sendBuff, sizeof(sendBuff));
 
-	/* Read the payload contents from stdin */
-	scanf("%d %f", &p.bot_id, &p.reading);
-	/* Write them to the buffer */
-	snprintf(sendBuff, sizeof(sendBuff), "%d %f", p.bot_id, p.reading);
-	/* Write the buffer to the socket */
-	printf("\nSending to server..");
-	sentbytes = write(sock, sendBuff, sizeof(sendBuff));
+		/* Read the payload contents from stdin */
+		scanf("%d %f", &p.bot_id, &p.reading);
+		/* Write them to the buffer */
+		snprintf(sendBuff, sizeof(sendBuff), "%d %f", p.bot_id, p.reading);
+		/* Write the buffer to the socket */
+		printf("\nSending to server..");
+		sentbytes = write(sock, sendBuff, sizeof(sendBuff));
 
-	if (sentbytes < 0) {
-		perror("\nError writing to the socket");
-	} else {
-		printf("\nSuccessfully written to the socket!");
+		if (sentbytes < 0) {
+			perror("\nError writing to the socket");
+		} else {
+			printf("\nSuccessfully written to the socket!\n\n");
+		}
 	}
 	printf("\nClosing socket\n");
 	close(sock);
