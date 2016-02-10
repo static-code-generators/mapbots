@@ -1,23 +1,31 @@
+#include<SoftwareSerial.h>
+
+#define SSID "ECE CLUB ROOM"
+#define PASS "ece@iiitd"
+#define IP "10.0.0.5" // Server IP
+#define PORT "5555" // Server port
+
 int echoPin = 7; // Echo Pin
 int trigPin = 8; // Trigger Pin
 int LEDPin = 13;// connected LED
 int maximumRange = 4; // Maximum range of sensor in metres
 int minimumRange = 0; // Minimum range needed
-float pingTime=0;
-float targetDistance=0; // Duration used to calculate distance
-int speedofSound=336; //constant in m/s
+float pingTime = 0;
+float targetDistance = 0; // Duration used to calculate distance
+int speedofSound = 336; //constant in m/s
 
-#define SSID "[ECE CLUB ROOM]"
-#define PASS "ece@iiitd"
-#define IP "10.0.0.5" // Server IP
-#define PORT "5555" // Server port
+int id = 0;
 
 boolean writeString (const char *buffer, int len);
 boolean connectWiFi();
 boolean connectServer();
 
+SoftwareSerial espSerial(10,11); // RX, TX
+
 void setup() {
-  Serial.begin (9600);
+  Serial.begin(9600);
+  espSerial.begin(115200);
+
   pinMode(trigPin, OUTPUT); //sonic pulse from trigPin
   pinMode(echoPin, INPUT);   //detection at Echo Pin
   pinMode(LEDPin, OUTPUT); // Use LED indicator (if required)
@@ -26,6 +34,7 @@ void setup() {
   connectServer();
 
 }
+
 void loop() {
   digitalWrite(trigPin, LOW); 
   delayMicroseconds(2000); 
@@ -55,6 +64,8 @@ void loop() {
   //Delay 1s before next reading.
   delay(1000);
 }
+
+
 boolean connectWiFi() {
   Serial.println("AT+CWMODE=1");
   delay(2000);
@@ -93,7 +104,9 @@ boolean connectServer() {
 }
 
 boolean writeString (const char *buffer, int len) {
-  Serial.print("AT+CIPSEND=0,");
-  Serial.print(len + 1);
+  Serial.print("AT+CIPSEND=");
+  Serial.print(id);
+  Serial.print(",");
+  Serial.println(len + 1);
   Serial.println(buffer);
 }
