@@ -1,4 +1,4 @@
-const int AL = 2; 
+const int AL = 2;
 const int BL = 3;
 const int AR = 4;
 const int BR = 5;
@@ -33,8 +33,8 @@ void loop() {
 
 void moveLeft() {
     // move left wheel anticlock
-    digitalWrite(AL, HIGH); 
-    digitalWrite(BL, LOW); 
+    digitalWrite(AL, HIGH);
+    digitalWrite(BL, LOW);
     // move right wheel clock
     digitalWrite(AR, LOW);
     digitalWrite(BR, HIGH);
@@ -42,8 +42,8 @@ void moveLeft() {
 
 void moveRight() {
     // move left wheel clock
-    digitalWrite(AL, LOW); 
-    digitalWrite(BL, HIGH); 
+    digitalWrite(AL, LOW);
+    digitalWrite(BL, HIGH);
     // move right wheel anticlock
     digitalWrite(AR, HIGH);
     digitalWrite(BR, LOW);
