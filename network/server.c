@@ -14,91 +14,101 @@
 #define PORT 5555
 #define BUFFSIZE 512
 
-void handleClient(int connfd);
+void handleClient(int connfd, struct sockaddr_in *client_addr);
 
 int main(int argc, char *argv[])
 {
-	int listenfd = 0, connfd = 0;
-	struct sockaddr_in serv_addr, client_addr;
-	socklen_t client_len;
+    int listenfd = 0, connfd = 0;
+    struct sockaddr_in serv_addr, client_addr;
+    socklen_t client_len;
 
-	listenfd = socket(AF_INET, SOCK_STREAM, 0);
-	memset(&serv_addr, 0, sizeof(serv_addr));
-	memset(&client_addr, 0, sizeof(client_addr));
+    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
 
-	serv_addr.sin_family = AF_INET; // IPv4 Address
-	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); // Any incoming address for the machine would do
-	serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_family = AF_INET; // IPv4 Address
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); // Any incoming address for the machine would do
+    serv_addr.sin_port = htons(PORT);
 
-	/* Bind and listen on a socket for incoming connections */
-	bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
-	listen(listenfd, 20);
+    /* Bind and listen on a socket for incoming connections */
+    bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    listen(listenfd, 20);
 
-	printf("\nServer listening for connections!\n");
+    printf("-- Server listening for connections!\n");
 
-	pid_t pid;
+    pid_t pid;
 
-	while(1)
-	{
-		client_len = sizeof(client_addr);
-		connfd = accept(listenfd, (struct sockaddr*)&client_addr,
-						&client_len);
-		printf("\nAccepted a connection from %s:%d\n",
-				inet_ntoa(client_addr.sin_addr),
-				(int) ntohs(client_addr.sin_port));
+    while(1)
+    {
+        client_len = sizeof(client_addr);
+        connfd = accept(listenfd, (struct sockaddr*)&client_addr,
+                        &client_len);
+        printf("-- Accepted a connection from %s:%d\n",
+                inet_ntoa(client_addr.sin_addr),
+                (int) ntohs(client_addr.sin_port));
 
-		pid = fork();
+        pid = fork();
 
-		if (pid > 0) {
-			/* parent */
-			close(connfd);
-			continue;
-		}
+        if (pid > 0) {
+            /* parent */
+            close(connfd);
+            continue;
+        }
 
-		if (pid == 0) {
-			/* child */
-			close(listenfd);
-			handleClient(connfd);
-			break;
-		}
-	}
-	return 0;
+        if (pid == 0) {
+            /* child */
+            close(listenfd);
+            handleClient(connfd, &client_addr);
+            break;
+        }
+    }
+    return 0;
 }
 
-void handleClient(int connfd)
+void handleClient(int connfd, struct sockaddr_in *client_addr)
 {
-	int readbytes = 0;
-	struct payload p;
-	char filename[20];
-	FILE *outfile;
-	char recvBuff[BUFFSIZE];
-	memset(recvBuff, 0, sizeof(recvBuff));
+    int readbytes = 0, correctread;
+    struct payload p;
+    char filename[20];
+    FILE *outfile;
+    char recvBuff[BUFFSIZE];
+    memset(recvBuff, 0, sizeof(recvBuff));
 
-	while ((readbytes=read(connfd, recvBuff, sizeof(recvBuff))) > 0)
-	{
-		recvBuff[readbytes] = '\0';
+    while ((readbytes=read(connfd, recvBuff, sizeof(recvBuff))) > 0)
+    {
+        recvBuff[readbytes] = '\0';
 
-		/* Read the data from buffer into payload */
-		sscanf(recvBuff, "%d %f", &p.bot_id, &p.reading);
-		/* Open a file for writing the readings */
-		sprintf(filename, "bot_%d.csv", p.bot_id);
-		printf("Writing to %s\n", filename);
-		outfile = fopen(filename, "a");
-		/* Write the data */
-		fprintf(outfile, "%d,%f\n", p.bot_id, p.reading);
-		/* Close file */
-		fclose(outfile);
-	}
+        /* Read the data from buffer into payload */
+        correctread = sscanf(recvBuff, "%d %f", &p.bot_id, &p.reading);
+        /* If data is in correct format save it into csv */
+        if (correctread == 2) {
+            /* Open a file for writing the readings */
+            sprintf(filename, "bot_%d.csv", p.bot_id);
+            printf("Client %s:%d writing to %s\n",
+                    inet_ntoa(client_addr->sin_addr),
+                    (int) ntohs(client_addr->sin_port),
+                    filename);
+            outfile = fopen(filename, "a");
+            /* Write the data */
+            fprintf(outfile, "%d,%f\n", p.bot_id, p.reading);
+            /* Close file */
+            fclose(outfile);
+        /* Else send error message to the client */
+        } else {
+            char * error_str = "Wrong input detected. Send in format \"\%d \%f\"\n"; 
+            write(connfd, error_str, strlen(error_str) + 1);
+        }
+    }
 
-	if(readbytes <= 0)
-	{
-		if (readbytes == 0) {
-			printf("\nClient went away :/");
-			close(connfd);
-		} else {
-			perror("\n Read error \n");
-		}
-	}
-	printf("\n\n");
-	return;
+    if(readbytes <= 0)
+    {
+        if (readbytes == 0) {
+            printf("-- Client Disconnected: %s:%d\n",
+                inet_ntoa(client_addr->sin_addr),
+                (int) ntohs(client_addr->sin_port));
+            close(connfd);
+        } else {
+            perror("--00-- Read error\n");
+        }
+    }
 }
