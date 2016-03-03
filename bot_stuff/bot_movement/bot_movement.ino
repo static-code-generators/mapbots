@@ -13,17 +13,10 @@ void setup() {
     Serial.begin(9600);
 }
 
-const int timeIncrement = 1000;
-int timeInterval = timeIncrement;
-
 void loop() {
-    moveLeft();
-    delay(1000);
-    stahp();
-
     moveForward();
-    delay(timeInterval);
-    timeInterval += timeIncrement;
-    stahp();
-    delay(1000);
+    delay(100);
+    Serial.print(digitalRead(encL), BIN);
+    Serial.print("\n");
+    delay(100);
 }

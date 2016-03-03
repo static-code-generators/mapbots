@@ -1,6 +1,6 @@
 // Constants.h
-#if !defined(MOVEMENT_CONSTANTS_H)
-#define MOVEMENT_CONSTANTS_H 1
+#ifndef MOVEMENT_CONSTANTS_H
+#define MOVEMENT_CONSTANTS_H
 
 const int AL = 2;
 const int BL = 3;
