@@ -1,6 +1,13 @@
 // Constants.h
 #ifndef MOVEMENT_CONSTANTS_H
 #define MOVEMENT_CONSTANTS_H
+// Some params: 
+// For motors:
+// At 5V, 
+// Stall current = 0.522A
+// RPM = 78
+// For wheels:
+// Diameter = 50mm
 
 const int AL = 2;
 const int BL = 3;
