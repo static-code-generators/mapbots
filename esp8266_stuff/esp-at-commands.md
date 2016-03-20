@@ -1,6 +1,5 @@
 ## List of commands to run
 ```
-AT+RST
 AT+CWJAP="SSID","PASSWORD"
 AT+CWMODE=1
 AT+CIPMUX=1
