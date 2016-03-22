@@ -1,4 +1,5 @@
 #include "Esp.h"
+#include "Error.h"
 
 void setup() {
     Serial.begin(115200);
@@ -16,7 +17,6 @@ void setup() {
         errorLED(noWiFi);
     while (!connectServer())
         errorLED(noServer);
-
 }
 
 void loop() {
