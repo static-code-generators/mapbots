@@ -79,7 +79,9 @@ void handleClient(int connfd, struct sockaddr_in *client_addr)
         recvBuff[readbytes] = '\0';
 
         /* Read the data from buffer into payload */
-        correctread = sscanf(recvBuff, "%d %f", &p.bot_id, &p.reading);
+        correctread = sscanf(recvBuff, "%d %f %f %f %f",
+                             &p.bot_id, &p.reading,
+                             &p.loc.x, &p.loc.y, &p.loc.theta);
         /* If data is in correct format save it into csv */
         if (correctread == 2) {
             /* Open a file for writing the readings */
@@ -90,12 +92,13 @@ void handleClient(int connfd, struct sockaddr_in *client_addr)
                     filename);
             outfile = fopen(filename, "a");
             /* Write the data */
-            fprintf(outfile, "%d,%f\n", p.bot_id, p.reading);
+            fprintf(outfile, "%d,%f,%f,%f,%f\n", p.bot_id, p.reading,
+                    p.loc.x, p.loc.y, p.loc.theta);
             /* Close file */
             fclose(outfile);
         /* Else send error message to the client */
         } else {
-            char * error_str = "Wrong input detected. Send in format \"\%d \%f\"\n"; 
+            char * error_str = "Wrong input detected. Send in format \"\%d \%f \%f \%f \%f\"\n"; 
             write(connfd, error_str, strlen(error_str) + 1);
         }
     }
