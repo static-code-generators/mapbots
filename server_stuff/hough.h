@@ -28,5 +28,4 @@ public:
 };
 
 table::index getIndex(const table& m, const float* requestedElement, const unsigned short int direction);
-
 table_index getIndexArray(const table& m, const float* requestedElement);
