@@ -1,4 +1,5 @@
 #include "Error.h"
+#include <Arduino.h>
 
 void errorLED(errorType error, int LEDPin) {
     if (error == noModule) {

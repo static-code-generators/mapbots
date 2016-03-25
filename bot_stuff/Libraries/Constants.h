@@ -21,4 +21,10 @@ const double circ = 157.07963267948965;
 const int numSlits = 30;
 const double distPerPulse = circ / numSlits;
 
+const int numSens = 8; // number of sensors used
+const int clockPin = 6;
+const int latchPin = 5;
+const int dataPin = 4;
+const int echoPin = 3;
+
 #endif
