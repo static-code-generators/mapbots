@@ -21,6 +21,7 @@ class houghSpace
     void initShape();
     int isMaxima(table_index idx);
 public:
+    void printVotingTable(std::ostream &str);
     houghSpace();
     houghSpace(std::vector<float> res, std::vector<float> maxVal);
     void addVote(std::vector<float> vote);
@@ -29,3 +30,5 @@ public:
 
 table::index getIndex(const table& m, const float* requestedElement, const unsigned short int direction);
 table_index getIndexArray(const table& m, const float* requestedElement);
+
+std::ostream& operator<<(std::ostream &str, houghSpace &hs);
