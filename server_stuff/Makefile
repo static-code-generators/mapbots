@@ -1,7 +1,7 @@
 CC=gcc
 CCLAGS=-std=c99
 CPP=g++
-CPPFLAGS=
+CPPFLAGS=-std=c++11
 
 all: server
 
