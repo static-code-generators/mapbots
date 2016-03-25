@@ -1,6 +1,6 @@
 /* 
 Emulating 24 sensors using 8 sensors by rotating
-them about a Servo.
+them about a servo motor.
 */
 
 #include<Servo.h>
@@ -9,8 +9,6 @@ them about a Servo.
 #include "Sensor.h"
 
 Servo myservo;
-
-int pos = 0;
 
 float distMatrix[3][8];
 byte sensorMatrix[3];
@@ -22,7 +20,7 @@ void setup()
     pinMode(latchPin, OUTPUT);
     pinMode(dataPin, OUTPUT);
     pinMode(echoPin, INPUT);
-    myservo.attach(9);
+    myservo.attach(servoPin);
 }
 
 void loop()

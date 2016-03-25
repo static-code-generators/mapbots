@@ -3,16 +3,6 @@
 
 // Code for using multiple sensors (upto 8)
 
-/* 
-Shift register pin connections
-Pin 1-7 and Pin 15 - outputs, HC-SR04 trig pins
-Pin 11 - clockPin - 6
-Pin 12 - latchPin -5 
-Pin 14 - dataPin - 4
-Pin 8 and 13 - GND
-Pin 10 and 16 - 5V
-Echo pins are connected to Pin 3, each through a transistor
-*/
 
 void triggerShiftRegisterAt(int i, byte sensors);
 
