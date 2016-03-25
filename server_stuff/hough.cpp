@@ -26,11 +26,11 @@ void houghSpace::initShape()
     }
 }
 
-int houghSpace::isMaxima(table_index idx)
+int houghSpace::isMaxima(tableIndices idx)
 {
     int indexDiff[3] = {-1, 0, 1};
     long long bound = boost::math::pow<numDim>(3);
-    table_index neighbour = idx;
+    tableIndices neighbour = idx;
     //iterate over all neighbours
     //this makes sense because all neighbours have at most numDim indices
     //different with a diff in range {-1, 0, 1} which has size 3
@@ -52,7 +52,7 @@ int houghSpace::isMaxima(table_index idx)
 
 void houghSpace::addVote(std::vector<float> vote)
 {
-    table_index idx;
+    tableIndices idx;
     for (int i = 0; i < numDim; ++i) {
         idx[i] = ROUND(vote[i] / m_res[i]);
         assert(idx[i] <= m_maxVal[i]);
@@ -66,9 +66,9 @@ table::index getIndex(const table& m, const float* requestedElement, const unsig
     return(offset / m.strides()[direction] % m.shape()[direction] +  m.index_bases()[direction]); 
 }
 
-table_index getIndexArray(const table& m, const float* requestedElement)
+tableIndices getIndexArray(const table& m, const float* requestedElement)
 {
-    table_index _idx;
+    tableIndices _idx;
     for (unsigned int dir = 0; dir < numDim; dir++)
     {
         _idx[dir] = getIndex(m, requestedElement, dir);
@@ -83,7 +83,7 @@ std::vector< std::vector<float> > houghSpace::getMaxima(int threshold)
     std::vector<float> currMaxima;
     auto p = m_votingTable.data();
     for (int i = 0; i < m_votingTable.num_elements(); ++i) {
-        table_index idx = getIndexArray(m_votingTable, p);
+        tableIndices idx = getIndexArray(m_votingTable, p);
         if(isMaxima(idx) && m_votingTable(idx) >= threshold) {
             for (int i = 0; i < numDim; ++i) {
                 currMaxima[i] = idx[i] * m_res[i];
