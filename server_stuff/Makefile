@@ -9,7 +9,7 @@ server: server.c payload.h
 	mkdir -p build
 	$(CC) $(CCFLAGS) server.c -o build/server
 
-hough: hough.cpp payload.h csvrow
+hough: hough.h hough.cpp
 	mkdir -p build
 	$(CPP) $(CPPFLAGS) -c hough.cpp
 	mv hough.o build
