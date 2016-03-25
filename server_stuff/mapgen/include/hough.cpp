@@ -47,6 +47,29 @@ int houghSpace::isMaxima(tableIndices idx)
     return 1;
 }
 
+int houghSpace::isMaximaEdgeOnly(tableIndices idx)
+{
+    int indexDiff[3] = {-1, 0, 1};
+    long long bound = boost::math::pow<numDim>(3);
+    tableIndices neighbour = idx;
+    for(long long incr = 0; incr < bound; ++incr) {
+        long long temp = incr;
+        int safe = 1, sharesEdge = 0;
+        for (int i = 0; i < numDim; ++i) {
+            neighbour[i] = idx[i] + indexDiff[temp % 3]; 
+            if (neighbour[i] >= m_shape[i] || neighbour[i] < 0)
+                safe = 0;
+            if (neighbour[i] == idx[i])
+                sharesEdge = 1;
+            temp /= 3;
+        }
+        if (safe && sharesEdge && neighbour != idx && m_votingTable(neighbour) >= m_votingTable(idx)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 void houghSpace::addVote(std::vector<float> vote)
 {
     tableIndices idx;

@@ -21,6 +21,7 @@ class houghSpace
     table m_votingTable; 
     void initShape();
     int isMaxima(tableIndices idx);
+    int isMaximaEdgeOnly(tableIndices idx);
 public:
     void printVotingTable(std::ostream &str);
     houghSpace(std::vector<float> res, std::vector<float> maxVal);
