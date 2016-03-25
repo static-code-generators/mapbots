@@ -1,27 +1,23 @@
 #include "hough.h"
-
-houghSpace::houghSpace() :
-    m_res (numDim, 0),
-    m_maxVal (numDim, 0)
-{
-    initShape();
-    m_votingTable = table(m_shape);
-    std::fill(m_votingTable.origin(), m_votingTable.origin() + m_votingTable.num_elements(), 0);
-}
+#include "boost/multi_array.hpp"
+#include "boost/math/special_functions/pow.hpp"
+#include <vector>
+#include <iostream>
+#include <cassert>
 
 houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal) :
     m_res (res),
     m_maxVal (maxVal)
 {
     initShape();
-    m_votingTable = table(m_shape);
+    m_votingTable.resize(m_shape);
     std::fill(m_votingTable.origin(), m_votingTable.origin() + m_votingTable.num_elements(), 0);
 }
 
 void houghSpace::initShape()
 {
     for (int i = 0; i < numDim; ++i) {
-        //+1 because 0-indexing
+        // +1 because 0-indexing
         m_shape[i] = ROUND(m_maxVal[i] / m_res[i]) + 1; 
     }
 }
@@ -44,8 +40,9 @@ int houghSpace::isMaxima(tableIndices idx)
                 safe = 0;
             temp /= 3;
         }
-        if (safe && neighbour != idx && m_votingTable(neighbour) >= m_votingTable(idx))
+        if (safe && neighbour != idx && m_votingTable(neighbour) >= m_votingTable(idx)) {
             return 0;
+        }
     }
     return 1;
 }
@@ -80,7 +77,7 @@ tableIndices getIndexArray(const table& m, const float* requestedElement)
 std::vector< std::vector<float> > houghSpace::getMaxima(int threshold)
 {
     std::vector< std::vector<float> > maxima;
-    std::vector<float> currMaxima;
+    std::vector<float> currMaxima (numDim);
     auto p = m_votingTable.data();
     for (int i = 0; i < m_votingTable.num_elements(); ++i) {
         tableIndices idx = getIndexArray(m_votingTable, p);
@@ -90,6 +87,7 @@ std::vector< std::vector<float> > houghSpace::getMaxima(int threshold)
             }
             maxima.push_back(currMaxima);
         }
+        ++p;
     }
     return maxima;
 }
@@ -99,8 +97,8 @@ void houghSpace::printVotingTable(std::ostream &str)
     str     << std::fixed 
             << std::setprecision(2) 
             << std::setfill(' ');
-    //this function assumes a 2d hough-space, is not 
-    //good idea to use this in production
+    /* this function assumes a 2d hough-space, is not 
+    good idea to use this in production */
     assert(numDim == 2);
 
     for (int i = -1; i < m_shape[0]; ++i) {

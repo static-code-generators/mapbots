@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
 #include "boost/multi_array.hpp"
 #include "boost/math/special_functions/pow.hpp"
+#include <vector>
+#include <iostream>
 #include <cassert>
 
 const int numDim = 2;
@@ -22,7 +23,6 @@ class houghSpace
     int isMaxima(tableIndices idx);
 public:
     void printVotingTable(std::ostream &str);
-    houghSpace();
     houghSpace(std::vector<float> res, std::vector<float> maxVal);
     void addVote(std::vector<float> vote);
     std::vector< std::vector<float> > getMaxima(int threshold);
