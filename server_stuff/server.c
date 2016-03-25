@@ -83,7 +83,7 @@ void handleClient(int connfd, struct sockaddr_in *client_addr)
                              &p.bot_id, &p.reading,
                              &p.loc.x, &p.loc.y, &p.loc.theta);
         /* If data is in correct format save it into csv */
-        if (correctread == 2) {
+        if (correctread == 5) {
             /* Open a file for writing the readings */
             sprintf(filename, "bot_%d.csv", p.bot_id);
             printf("Client %s:%d writing to %s\n",
