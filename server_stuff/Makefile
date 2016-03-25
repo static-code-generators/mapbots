@@ -9,9 +9,15 @@ server: server.c payload.h
 	mkdir -p build
 	$(CC) $(CCFLAGS) server.c -o build/server
 
-hough: hough.cpp payload.h
+hough: hough.cpp payload.h csvrow
 	mkdir -p build
-	$(CPP) $(CPPFLAGS) hough.cpp -o build/hough
+	$(CPP) $(CPPFLAGS) -c hough.cpp
+	mv hough.o build
+
+csvrow: CSVRow.cpp CSVRow.h
+	mkdir -p build
+	$(CPP) $(CPPFLAGS) -c CSVRow.cpp
+	mv CSVRow.o build
 
 clean:
 	rm -rf build
