@@ -75,7 +75,7 @@ void houghSpace::addVote(std::vector<float> vote)
     tableIndices idx;
     for (int i = 0; i < numDim; ++i) {
         idx[i] = ROUND(vote[i] / m_res[i]);
-        assert(idx[i] <= m_maxVal[i]);
+        assert(idx[i] <= m_shape[i]);
     }
     m_votingTable(idx)++;
 }

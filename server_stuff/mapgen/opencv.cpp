@@ -4,12 +4,18 @@
 #include <cassert>
 #include <vector>
 #include <utility>
+#include <cmath>
 #include "hough.h"
+
+#define RHO 0
+#define THETA 1
+
+#define PPRINT(x) std::cout << #x << ": " << x << std::endl
 
 int main(int argc, char **argv)
 {
-    if (argc < 2) {
-        std::cout << "USAGE: " << argv[0] << " <filename>"
+    if (argc < 3) {
+        std::cout << "USAGE: " << argv[0] << " <filename> <threshold>"
                   << std::endl;
         return -1;
     }
@@ -20,7 +26,7 @@ int main(int argc, char **argv)
     cv::Canny(src, dst, 50, 200, 3);
     cv::cvtColor(dst, cdst, CV_GRAY2BGR);
 
-    cv::imwrite("cdst.jpg", cdst);
+    //cv::imwrite("cdst.jpg", cdst);
     
     std::vector< std::pair<int, int> > coords; // List of x, y coords
     for (int i=0; i<cdst.rows; ++i) {
@@ -31,9 +37,38 @@ int main(int argc, char **argv)
             }
         }
     }
+    // Now to create a hough table of rho and theta, we need to know
+    // the maxVals of both.
+    // Our table will be of dimensions max(rho) x max(theta)
+    std::vector<float> maxVal(2), res(2);
+    maxVal[RHO] = (float) 2 * (sqrt(pow(cdst.rows, 2) + pow(cdst.cols, 2)));
+    maxVal[THETA] = (float) 2 * M_PI;
+
+    PPRINT(maxVal[RHO]); 
+    PPRINT(maxVal[THETA]); 
+    // Let's arbitrarily define the resolution of the table
+    res[RHO] = 1;
+    res[THETA] = M_PI / 180; 
+
+    houghSpace hs (res, maxVal);
+
+    std::vector<float> vote(2);
     for (auto &p: coords) {
-        std::cout << p.first << ", " << p.second << std::endl;
+        for (float theta = 0; theta < 2 * M_PI; theta += M_PI / 180) {
+            vote[RHO] = abs(p.first * cosf(theta) +  p.second + sinf(theta));
+            vote[THETA] = theta;
+            assert(vote[RHO] <= maxVal[RHO]);
+            assert(vote[THETA] <= maxVal[THETA]);
+            hs.addVote(vote);
+        }
     }
-    //std::cout << cdst;
+    std::vector< std::vector<float> > vec (hs.getMaxima(atoi(argv[2])));
+    for (auto &p: vec) {
+        for (auto &q: p) {
+            std::cout << q << " ";
+        }
+        std::cout << std::endl;
+    }
+
     return 0;
 }

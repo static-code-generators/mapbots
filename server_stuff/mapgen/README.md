@@ -11,7 +11,7 @@ To compile individual libraries/binaries do:
 make build/libname.o
 
 # For binaries
-make binname
+make build/binname
 ```
 
 #### Directory Structure
