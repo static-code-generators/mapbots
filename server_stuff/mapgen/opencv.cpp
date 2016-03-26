@@ -5,6 +5,7 @@
 #include <vector>
 #include <utility>
 #include <cmath>
+#include <algorithm>
 #include "hough.h"
 
 #define RHO 0
@@ -57,7 +58,7 @@ int main(int argc, char **argv)
          */
         for (float theta = 0; theta < M_PI; theta += M_PI / 180) {
             m = tanf(theta);
-            vote[RHO] = abs(p.second - m * p.first) / (sqrt(1 + m*m));
+            vote[RHO] = std::abs(p.second - m * p.first) / (sqrt(1 + m*m));
             /* Case I: y-intercept is > 0 */
             if ((p.second - m * p.first) > 0) {
                 if (theta < M_PI / 2.0) {
