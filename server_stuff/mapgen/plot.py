@@ -25,36 +25,21 @@ def line_function_creator(rho, theta):
 def main():
     plt.clf()
     plt.cla()
-    lines = []
+    minX, maxX = 0, 300
+    minY, maxY = 0, 300
     for line in sys.stdin:
-        lines.append(tuple(map(float, line.split())))
-
-    #put all the lines which have theta = 0 at the end
-    negative_second = lambda tup : -abs(tup[1])
-    lines.sort(key=negative_second)
-
-    #to know the bounds over which we want to plot lines
-    #which are parallel to the Y-axis
-    maxY, minY = 0, 0 
-    at_zeros = 0
-    for line in lines:
-        rho, theta = line
+        rho, theta = map(float, line.split())
         try:
             line_function = line_function_creator(rho, theta)
-            X = np.arange(-100, 100, 0.2)
-            Y = [line_function(i) for i in X]
-            maxY = max(maxY, max(Y))
-            minY = min(minY, min(Y))
+            X = np.arange(minX, maxX, 0.2)
+            X = np.array([i for i in X if minY <= line_function(i) <= maxY])
+            Y = np.array([line_function(i) for i in X])
             plt.plot(X, Y)
         except ZeroDivisionError:
-            #tune bounds to fill empty space matplotlib leaves
-            if at_zeros == 0:
-                at_zeros = 1
-                minY -= 5
-                maxY += 5
             Y = np.arange(minY, maxY, 0.2)
             X = [rho for _ in Y]
-            plt.plot(X, Y)
+            if minX <= rho <= maxX:
+                plt.plot(X, Y)
 
     plt.savefig('plot_lines.png')
     print("saved output to plot_lines.png")
