@@ -27,4 +27,5 @@ def main():
     plt.savefig('plot_lines.png')
     print("saved output to plot_lines.png")
 
-main()
+if __name__ == '__main__':
+    main()
