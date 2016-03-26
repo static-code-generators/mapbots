@@ -10,6 +10,12 @@ all: dir $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o
 dir:
 	mkdir -p $(BUILDDIR)
 
+$(BUILDDIR)/houghmain: dir $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o $(BUILDDIR)/houghmain.o
+	$(CPP) $(CPPFLAGS) $(BUILDDIR)/CSVRow.o $(BUILDDIR)/hough.o $(BUILDDIR)/houghmain.o -o $(BUILDDIR)/houghmain
+
+$(BUILDDIR)/houghmain.o: dir houghmain.cpp
+	$(CPP) $(CPPFLAGS) -c houghmain.cpp -o $(BUILDDIR)/houghmain.o
+
 $(BUILDDIR)/opencv: dir $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o
 	$(CPP) $(CPPFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
 

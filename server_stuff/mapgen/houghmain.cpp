@@ -9,6 +9,9 @@
 #define RHO 0
 #define THETA 1
 
+#define X 0
+#define Y 0
+
 std::vector<payload> readCSV(char *filename)
 {
     std::ifstream fin (filename);
@@ -36,7 +39,16 @@ void addVotes(std::vector<payload> readings)
 {
     std::vector<float> maxVal(2), res(2);
     std::vector<float> vote(2);
-    maxVal[RHO] = (float) 1500; // in centimetres
+
+    /**
+     * LINE SPACE
+     * RHO: The perpendicular distance of the line from origin
+     * THETA: Angle the perpendicular from the origin to the line
+     *        makes with +X axis
+     *
+     * beta: Angular error of ultrasonic sensor, -15deg < beta < 15deg
+     */
+    maxVal[RHO] = 1500.0F; // in centimetres
     maxVal[THETA] = (float) M_PI; // in radians
     res[RHO] = 1;
     res[THETA] = M_PI / 180;
@@ -45,20 +57,45 @@ void addVotes(std::vector<payload> readings)
 
     for (auto &p: readings) {
         for (float beta = -M_PI/12; beta <= M_PI/12; beta += M_PI/180) {
-            vote[THETA] = p.theta + beta;
+            // Refer to the paper for the derivation
+            vote[THETA] = p.loc.theta + beta;
             if (vote[THETA] < 0) {
                 vote[THETA] += M_PI;
             } else if (vote[THETA] > M_PI) {
                 vote[THETA] -= M_PI;
             }
-            vote[RHO] = p.reading + (p.x * cosf(vote[THETA]))
-                                  + (p.y * sinf(vote[THETA]));
+            vote[RHO] = p.reading + (p.loc.x * cosf(vote[THETA]))
+                                  + (p.loc.y * sinf(vote[THETA]));
             assert(vote[RHO] <= maxVal[RHO]);
             assert(vote[THETA] <= maxVal[THETA]);
             linespace.addVote(vote);
         }
     }
-    // TODO do for point space too
+    std::cout << linespace;
+    /**
+     * POINT SPACE
+     * X: X-coordinate of point
+     * Y: Y-coordinate of point
+     *
+     * beta: Angular error of ultrasonic sensor, -15deg < beta < 15deg
+     */
+    maxVal[X] = 1500.0F; // in centimetres
+    maxVal[Y] = 1500.0F; // in centimetres
+    res[X] = 1;
+    res[Y] = 1;
+
+    houghSpace pointspace (res, maxVal);
+
+    for (auto &p: readings) {
+        for (float beta = -M_PI/12; beta <= M_PI/12; beta += M_PI/180) {
+            vote[X] = p.loc.x + (p.reading * cosf(p.loc.theta + beta));
+            vote[Y] = p.loc.y + (p.reading * sinf(p.loc.theta + beta));
+            assert(vote[X] <= maxVal[X]);
+            assert(vote[Y] <= maxVal[Y]);
+            pointspace.addVote(vote);
+        }
+    }
+    std::cout << pointspace;
 }
 
 int main(int argc, char **argv)
