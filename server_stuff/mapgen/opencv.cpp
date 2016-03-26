@@ -42,8 +42,8 @@ int main(int argc, char **argv)
     maxVal[RHO] = (float) (sqrt(pow(cdst.rows, 2) + pow(cdst.cols, 2)));
     maxVal[THETA] = (float) 2 * M_PI;
 
-    PPRINT(maxVal[RHO]); 
-    PPRINT(maxVal[THETA]); 
+    //PPRINT(maxVal[RHO]); 
+    //PPRINT(maxVal[THETA]); 
     res[RHO] = 1;
     res[THETA] = M_PI / 180; 
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     }
     std::vector< std::vector<float> > vec (hs.getMaxima(atoi(argv[2])));
     for (auto &p: vec) {
-        std::cout << p[0] << ","
+        std::cout << p[0] << " "
                   << p[1] << std::endl;
     }
 
