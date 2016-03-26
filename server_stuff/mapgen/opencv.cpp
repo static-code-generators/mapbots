@@ -26,13 +26,10 @@ int main(int argc, char **argv)
     cv::Canny(src, dst, 50, 200, 3);
     cv::cvtColor(dst, cdst, CV_GRAY2BGR);
 
-    //cv::imwrite("cdst.jpg", cdst);
-    
     std::vector< std::pair<int, int> > coords; // List of x, y coords
     for (int i=0; i<cdst.rows; ++i) {
-        uchar *p = cdst.ptr(i);
         for (int j=0; j<cdst.cols; ++j) {
-            if (p[j] == 255) {
+            if (cdst.at<cv::Vec3b>(i,j)[0] == 255) {
                 coords.push_back(std::make_pair(j, cdst.rows - i));
             }
         }
@@ -41,22 +38,42 @@ int main(int argc, char **argv)
     // the maxVals of both.
     // Our table will be of dimensions max(rho) x max(theta)
     std::vector<float> maxVal(2), res(2);
-    maxVal[RHO] = (float) 2 * (sqrt(pow(cdst.rows, 2) + pow(cdst.cols, 2)));
+    maxVal[RHO] = (float) (sqrt(pow(cdst.rows, 2) + pow(cdst.cols, 2)));
     maxVal[THETA] = (float) 2 * M_PI;
 
     PPRINT(maxVal[RHO]); 
     PPRINT(maxVal[THETA]); 
-    // Let's arbitrarily define the resolution of the table
     res[RHO] = 1;
     res[THETA] = M_PI / 180; 
 
     houghSpace hs (res, maxVal);
 
     std::vector<float> vote(2);
+    float m; // slope
     for (auto &p: coords) {
-        for (float theta = 0; theta < 2 * M_PI; theta += M_PI / 180) {
-            vote[RHO] = abs(p.first * cosf(theta) +  p.second + sinf(theta));
-            vote[THETA] = theta;
+        /* The theta here is the slope of the line with +X axis
+         * We'll convert the line from slope-point form to hesse-normal
+         * form for the hough table
+         */
+        for (float theta = 0; theta < M_PI; theta += M_PI / 180) {
+            m = tanf(theta);
+            vote[RHO] = abs(p.second - m * p.first) / (sqrt(1 + m*m));
+            /* Case I: y-intercept is > 0 */
+            if ((p.second - m * p.first) > 0) {
+                if (theta < M_PI / 2.0) {
+                    vote[THETA] = theta + M_PI / 2.0;
+                } else {
+                    vote[THETA] = theta - M_PI / 2.0;
+                }
+            }
+            /* Case II: y-intercept is < 0 */
+            else {
+                if (theta < M_PI / 2.0) {
+                    vote[THETA] = theta + M_PI + M_PI / 2.0;
+                } else {
+                    vote[THETA] = theta + M_PI - M_PI / 2.0;
+                }
+            }
             assert(vote[RHO] <= maxVal[RHO]);
             assert(vote[THETA] <= maxVal[THETA]);
             hs.addVote(vote);
@@ -64,10 +81,8 @@ int main(int argc, char **argv)
     }
     std::vector< std::vector<float> > vec (hs.getMaxima(atoi(argv[2])));
     for (auto &p: vec) {
-        for (auto &q: p) {
-            std::cout << q << " ";
-        }
-        std::cout << std::endl;
+        std::cout << p[0] << ","
+                  << p[1] << std::endl;
     }
 
     return 0;
