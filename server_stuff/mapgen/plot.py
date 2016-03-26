@@ -1,3 +1,10 @@
+"""
+plots lines, reads from stdin until eof
+in format
+rho theta
+where rho is the distance of the line from the origin
+and theta is the angle of the shortest line from the origin and the x-axis, in radians
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
