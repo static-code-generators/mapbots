@@ -10,7 +10,9 @@
 #define THETA 1
 
 #define X 0
-#define Y 0
+#define Y 1
+
+#define PPRINT(x) std::cout << #x << ": " << x << std::endl
 
 std::vector<payload> readCSV(char *filename)
 {
@@ -68,10 +70,12 @@ void addVotes(std::vector<payload> readings)
                                   + (p.loc.y * sinf(vote[THETA]));
             assert(vote[RHO] <= maxVal[RHO]);
             assert(vote[THETA] <= maxVal[THETA]);
+            PPRINT(vote[RHO]);
+            PPRINT(vote[THETA]);
             linespace.addVote(vote);
         }
     }
-    std::cout << linespace;
+    //std::cout << linespace;
     /**
      * POINT SPACE
      * X: X-coordinate of point
@@ -92,10 +96,12 @@ void addVotes(std::vector<payload> readings)
             vote[Y] = p.loc.y + (p.reading * sinf(p.loc.theta + beta));
             assert(vote[X] <= maxVal[X]);
             assert(vote[Y] <= maxVal[Y]);
+            PPRINT(vote[X]);
+            PPRINT(vote[Y]);
             pointspace.addVote(vote);
         }
     }
-    std::cout << pointspace;
+    //std::cout << pointspace;
 }
 
 int main(int argc, char **argv)
