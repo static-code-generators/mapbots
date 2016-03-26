@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
+#include <cmath>
 
 #define RHO 0
 #define THETA 1
@@ -44,10 +45,19 @@ void addVotes(std::vector<payload> readings)
 
     for (auto &p: readings) {
         for (float beta = -M_PI/12; beta <= M_PI/12; beta += M_PI/180) {
-            // TODO calculate rho and theta and addvote
+            vote[THETA] = p.theta + beta;
+            if (vote[THETA] < 0) {
+                vote[THETA] += M_PI;
+            } else if (vote[THETA] > M_PI) {
+                vote[THETA] -= M_PI;
+            }
+            vote[RHO] = p.reading + (p.x * cosf(vote[THETA]))
+                                  + (p.y * sinf(vote[THETA]));
+            assert(vote[RHO] <= maxVal[RHO]);
+            assert(vote[THETA] <= maxVal[THETA]);
+            linespace.addVote(vote);
         }
     }
-
     // TODO do for point space too
 }
 
