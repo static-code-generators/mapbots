@@ -41,7 +41,7 @@ def main():
         rho, theta = line
         try:
             line_function = line_function_creator(rho, theta)
-            X = np.arange(0, 10, 0.2)
+            X = np.arange(-100, 100, 0.2)
             Y = [line_function(i) for i in X]
             maxY = max(maxY, max(Y))
             minY = min(minY, min(Y))
