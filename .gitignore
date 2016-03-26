@@ -2,3 +2,5 @@
 *a.out
 *.csv
 *.o
+*.pyc
+*.png
