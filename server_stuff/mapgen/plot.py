@@ -59,7 +59,7 @@ def plotpoints(f, plt, x_range=(0, 100), y_range=(0, 100)):
     minY, maxY = y_range
     for point in f:
         coord = tuple(map(float, point.split()))
-        if (minX < coord[0] < maxX) and (minY < coord[1] < maxY):
+        if (minX <= coord[0] <= maxX) and (minY <= coord[1] <= maxY):
             plt.plot(coord[0], coord[1], 'ro')
 
 def main():
