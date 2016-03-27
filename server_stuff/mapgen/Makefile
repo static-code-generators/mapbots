@@ -1,32 +1,35 @@
 IDIR=include
 
-CPP=g++
-CPPFLAGS=-std=c++11 -O3 -I. -I$(IDIR)
+
+CXX=g++
+CXXFLAGS=-std=c++11 -O3 -I. -I$(IDIR)
 
 BUILDDIR=build
 
-all: dir $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o
+.PHONY: clean
 
-dir:
+all: $(BUILDDIR)/houghmain $(BUILDDIR)/opencv | $(BUILDDIR)
+
+$(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
-$(BUILDDIR)/houghmain: dir $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o $(BUILDDIR)/houghmain.o
-	$(CPP) $(CPPFLAGS) $(BUILDDIR)/CSVRow.o $(BUILDDIR)/hough.o $(BUILDDIR)/houghmain.o -o $(BUILDDIR)/houghmain
+$(BUILDDIR)/houghmain: $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o $(BUILDDIR)/houghmain.o | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(BUILDDIR)/CSVRow.o $(BUILDDIR)/hough.o $(BUILDDIR)/houghmain.o -o $(BUILDDIR)/houghmain
 
-$(BUILDDIR)/houghmain.o: dir houghmain.cpp
-	$(CPP) $(CPPFLAGS) -c houghmain.cpp -o $(BUILDDIR)/houghmain.o
+$(BUILDDIR)/houghmain.o: houghmain.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c houghmain.cpp -o $(BUILDDIR)/houghmain.o
 
-$(BUILDDIR)/opencv: dir $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o
-	$(CPP) $(CPPFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
+$(BUILDDIR)/opencv: $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
 
-$(BUILDDIR)/opencv.o: dir opencv.cpp
-	$(CPP) $(CPPFLAGS) `pkg-config --cflags --libs opencv` -c opencv.cpp -o $(BUILDDIR)/opencv.o
+$(BUILDDIR)/opencv.o: opencv.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` -c opencv.cpp -o $(BUILDDIR)/opencv.o
 
-$(BUILDDIR)/hough.o: dir $(IDIR)/hough.h $(IDIR)/hough.cpp
-	$(CPP) $(CPPFLAGS) -c $(IDIR)/hough.cpp -o $(BUILDDIR)/hough.o
+$(BUILDDIR)/hough.o: $(IDIR)/hough.h $(IDIR)/hough.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c $(IDIR)/hough.cpp -o $(BUILDDIR)/hough.o
 
-$(BUILDDIR)/CSVRow.o: dir $(IDIR)/CSVRow.cpp $(IDIR)/CSVRow.h
-	$(CPP) $(CPPFLAGS) -c $(IDIR)/CSVRow.cpp -o $(BUILDDIR)/CSVRow.o
+$(BUILDDIR)/CSVRow.o: $(IDIR)/CSVRow.cpp $(IDIR)/CSVRow.h | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c $(IDIR)/CSVRow.cpp -o $(BUILDDIR)/CSVRow.o
 
 clean:
-	rm -rf build
+	rm -rf $(BUILDDIR)

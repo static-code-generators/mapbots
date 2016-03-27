@@ -1,13 +1,15 @@
 CC=gcc
-CCLAGS=-std=c99
+CFLAGS=-std=c99
 
-all: dir server
+BUILDDIR=build
 
-dir:
+all: $(BUILDDIR)/server
+
+$(BUILDDIR):
 	mkdir -p build
 
-server: dir server.c payload.h
-	$(CC) $(CCFLAGS) server.c -o build/server
+$(BUILDDIR)/server: server.c payload.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) server.c -o $(BUILDDIR)/server
 
 clean:
 	rm -rf build
