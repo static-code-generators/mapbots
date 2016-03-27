@@ -25,8 +25,32 @@ To plot `lines` and `points` which might help in visualizing the map generated, 
 
 ```bash
 ./plot.py --help
+usage: plot.py [-h] [-l [LINEFILE]] [-p [POINTFILE]] [--xmin XMIN]
+               [--xmax XMAX] [--ymin YMIN] [--ymax YMAX]
+               outfile
+
+Plot lines (Hesse normal form) and points (Cartesian coordinates)
+
+positional arguments:
+  outfile               Output image file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l [LINEFILE], --linefile [LINEFILE]
+                        File from which to read lines
+  -p [POINTFILE], --pointfile [POINTFILE]
+                        File from which to read points
+  --xmin XMIN           Minimum value to plot on X-axis (default = 0)
+  --xmax XMAX           Maximum value to plot on X-axis (default = 100)
+  --ymin YMIN           Minimum value to plot on Y-axis (default = 0)
+  --ymax YMAX           Maximum value to plot on Y-axis (default = 100)
 ```
 
+To read from stdin do
 ```bash
-./plot.py -l lines.txt -p points.txt out.png
+./plot.py -p - out.png
+1 2
+3 4
+5 6
+EOF
 ```
