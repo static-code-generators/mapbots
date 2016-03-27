@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+#if you get weird error, try with python3
 
 """
 Plot lines (Hesse normal form) and points (Cartesian coordinates)
