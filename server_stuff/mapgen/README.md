@@ -15,7 +15,18 @@ make build/binname
 ```
 
 #### Directory Structure
-The main directory contains cpp files that have a `main()` function and use libs in `include/`
+The root directory contains cpp files that have a `main()` function and can be compiled into a binary
 
 `include/` contains the libraries that you can `#include` in your program
-`build/` is a directory ignored by git, in which all object files and binaries are compiled into
+`build/` is a directory ignored by git, all object files and binaries are compiled into it
+
+#### Plotting
+To plot `lines` and `points` which might help in visualizing the map generated, use the script `plot.py`
+
+```bash
+./plot.py --help
+```
+
+```bash
+./plot.py -l lines.txt -p points.txt out.png
+```
