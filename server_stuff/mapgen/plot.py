@@ -28,7 +28,7 @@ def plotlines(f, plt, x_range=(0, 100), y_range=(0, 100)):
     where rho is the distance of the line from the origin
     and theta is the angle of the shortest line from the origin
     and the x-axis, in radians
-    plt: Matplotlib module
+    plt: matplotlib.pyplot module
     x_range: Plot range of x-axis (min, max)
     y_range: Plot range of y-axis (min, max)
     """
@@ -66,10 +66,10 @@ def plotpoints(f, plt, x_range=(0, 100), y_range=(0, 100)):
 def main():
     program_desc ="""Plot lines (Hesse normal form) and points (Cartesian coordinates)"""
     parser = argparse.ArgumentParser(description=program_desc)
-    parser.add_argument('-l', '--linefile', nargs='?',
+    parser.add_argument('-l', '--linefile',
             help='File from which to read lines',
             type=argparse.FileType('r'))
-    parser.add_argument('-p', '--pointfile', nargs='?',
+    parser.add_argument('-p', '--pointfile',
             help='File from which to read points',
             type=argparse.FileType('r'))
     parser.add_argument('outfile',
