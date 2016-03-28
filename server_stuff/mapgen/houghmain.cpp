@@ -12,6 +12,8 @@
 #define X 0
 #define Y 1
 
+#define M_PI 3.14159265358979323846
+
 #define PPRINT(x) std::cout << #x << ": " << x << std::endl
 
 std::vector<payload> readCSV(char *filename)

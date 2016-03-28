@@ -11,6 +11,8 @@
 #define RHO 0
 #define THETA 1
 
+#define M_PI 3.14159265358979323846
+
 #define PPRINT(x) std::cout << #x << ": " << x << std::endl
 
 int main(int argc, char **argv)
