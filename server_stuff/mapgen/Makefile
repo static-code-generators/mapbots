@@ -8,7 +8,7 @@ BUILDDIR=build
 
 .PHONY: clean
 
-all: $(BUILDDIR)/houghmain $(BUILDDIR)/opencv | $(BUILDDIR)
+all: $(BUILDDIR)/houghmain $(BUILDDIR)/houghcircle $(BUILDDIR)/opencv | $(BUILDDIR)
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -18,6 +18,12 @@ $(BUILDDIR)/houghmain: $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o $(BUILDDIR)/houg
 
 $(BUILDDIR)/houghmain.o: houghmain.cpp | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) -c houghmain.cpp -o $(BUILDDIR)/houghmain.o
+
+$(BUILDDIR)/houghcircle: $(BUILDDIR)/hough.o $(BUILDDIR)/houghcircle.o | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -g $(BUILDDIR)/hough.o $(BUILDDIR)/houghcircle.o -o $(BUILDDIR)/houghcircle
+
+$(BUILDDIR)/houghcircle.o: houghcircle.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c houghcircle.cpp -o $(BUILDDIR)/houghcircle.o
 
 $(BUILDDIR)/opencv: $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
