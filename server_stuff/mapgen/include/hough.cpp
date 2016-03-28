@@ -124,33 +124,33 @@ std::vector< std::vector<float> > houghSpace::getMaxima(int threshold)
     return maxima;
 }
 
-void houghSpace::printVotingTable(std::ostream &str)
-{
-    str     << std::fixed 
-            << std::setprecision(2) 
-            << std::setfill(' ');
-    /* this function assumes a 2d hough-space, is not 
-    good idea to use this in production */
-    assert(numDim == 2);
+/*void houghSpace::printVotingTable(std::ostream &str)*/
+//{
+    //str     << std::fixed 
+            //<< std::setprecision(2) 
+            //<< std::setfill(' ');
+    //[> this function assumes a 2d hough-space, is not 
+    //good idea to use this in production */
+    //assert(numDim == 2);
 
-    for (int i = -1; i < m_shape[0]; ++i) {
-        for (int j = -1; j < m_shape[1]; ++j) {
-            str << std::setw(6);
-            if (i == -1 && j == -1)
-                str << 0;
-            else if (i == -1)
-                str << j * m_res[1];
-            else if (j == -1)
-                str << i * m_res[0];
-            else
-                str << m_votingTable[i][j];
-        }
-        str << std::endl;
-    }
-}
+    //for (int i = -1; i < m_shape[0]; ++i) {
+        //for (int j = -1; j < m_shape[1]; ++j) {
+            //str << std::setw(6);
+            //if (i == -1 && j == -1)
+                //str << 0;
+            //else if (i == -1)
+                //str << j * m_res[1];
+            //else if (j == -1)
+                //str << i * m_res[0];
+            //else
+                //str << m_votingTable[i][j];
+        //}
+        //str << std::endl;
+    //}
+//}
 
-std::ostream& operator<<(std::ostream &str, houghSpace &hs)
-{
-    hs.printVotingTable(str);
-    return str;
-}
+//std::ostream& operator<<(std::ostream &str, houghSpace &hs)
+//{
+    //hs.printVotingTable(str);
+    //return str;
+/*}*/

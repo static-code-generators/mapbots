@@ -6,10 +6,10 @@
 #include <iostream>
 #include <cassert>
 
-const int numDim = 2;
+const int numDim = 3;
 
 typedef boost::multi_array<float, numDim> table;
-typedef boost::array<table::index, numDim> tableIndices;
+typedef boost::array<table::index, numDim> tableIndices; // numDim-dimensional vector
 
 #define ROUND(x) (int)(x + 0.5)
 
@@ -34,4 +34,4 @@ public:
 table::index getIndex(const table& m, const float* requestedElement, const unsigned short int direction);
 tableIndices getIndexArray(const table& m, const float* requestedElement);
 
-std::ostream& operator<<(std::ostream &str, houghSpace &hs);
+//std::ostream& operator<<(std::ostream &str, houghSpace &hs);

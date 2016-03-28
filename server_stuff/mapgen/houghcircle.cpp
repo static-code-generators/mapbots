@@ -14,7 +14,7 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
 {
     // Circle is defined by 3 parameters, (a, b) of center and radius
     // Hence 3-dimension Hough Space required
-    std::vector<float> maxVal(3), res(3);
+    std::vector<float> minVal(3), maxVal(3), res(3);
     std::vector<float> vote(3);
 
     /*
@@ -27,13 +27,17 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
     maxVal[A] = 1.0; // in femtometres
     maxVal[B] = 1.0; // in femtometres
     maxVal[R] = 1.0; // in femtometres
+
+    minVal[A] = -1.0; // in femtometres
+    minVal[B] = -1.0; // in femtometres
+    minVal[R] = -1.0; // in femtometres
     // res discretizes the parameter space by giving the 'steps'
     // over which each vote should be given
     res[A] = 0.0001;
     res[B] = 0.0001;
     res[R] = 0.0001;
 
-    houghSpace circlespace (res, maxVal);
+    houghSpace circlespace (res, maxVal, minVal);
 
     // X = A + R*cos(theta)
     // Y = B + R*sin(theta)
