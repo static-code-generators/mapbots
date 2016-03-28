@@ -31,6 +31,7 @@ tableIndices houghSpace::indexOf(std::vector<float> cell)
         assert(cell[i] >= m_minVal[i] && cell[i] <= m_maxVal[i]);
         idx[i] = ROUND((cell[i] - m_minVal[i]) / m_res[i]);
         assert(idx[i] < m_shape[i]);
+        //assert(idx[i] >= 0);
     }
     return idx;
 }

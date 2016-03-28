@@ -33,9 +33,9 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
     minVal[R] = -1.0; // in femtometres
     // res discretizes the parameter space by giving the 'steps'
     // over which each vote should be given
-    res[A] = 0.0001;
-    res[B] = 0.0001;
-    res[R] = 0.0001;
+    res[A] = 0.01;
+    res[B] = 0.01;
+    res[R] = 0.01;
 
     houghSpace circlespace (res, maxVal, minVal);
 
@@ -53,9 +53,9 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
                 assert(vote[A] <= maxVal[A]);
                 assert(vote[B] <= maxVal[B]);
                 assert(vote[R] <= maxVal[R]);
-                PPRINT(vote[A]);
-                PPRINT(vote[B]);
-                PPRINT(vote[R]);
+                //PPRINT(vote[A]);
+                //PPRINT(vote[B]);
+                //PPRINT(vote[R]);
                 circlespace.addVote(vote);
             }
         }
@@ -64,17 +64,23 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
     return circlespace;
 }
 
+std::istream &operator>>(std::istream &str, std::pair<float, float> T)
+{
+    str >> T.first >> T.second;
+    return str;
+}
+
 
 int main(int argc, char **argv)
 {
     long int nofTests;
-    scanf("%ld", &nofTests);
+    std::cin >> nofTests;
 
     long int i;
     for(i = 0; i < nofTests; i++)
     {
         long int nofPoints;
-        scanf("%ld", &nofPoints);
+        std::cin >> nofPoints;
 
         std::vector< std::pair<float, float> > coords;
 
@@ -82,19 +88,23 @@ int main(int argc, char **argv)
         for(j = 0; j < nofPoints; j++)
         {
             std::pair<float, float> coord;
-            scanf("%f", &coord.first);
-            scanf("%f", &coord.second);
-            coords.push_back(coord);
+            std::cin >> coord;
+            // Checking for rogue test data
+            float epsilon = 0.001;
+            if(std::abs(coord.first) + epsilon <= 1.0 && std::abs(coord.second) + epsilon <= 1.0)
+                coords.push_back(coord);
         }
 
         houghSpace circlespace = addVotes(coords);
         std::vector< std::vector<float> > vec (circlespace.getMaxima(atoi(argv[1])));
 
+        std::cout << "Test case: " << i << std::endl;
         for(auto &p: vec) {
             std::cout << p[0] << " "
                       << p[1] << " "
                       << p[2] << std::endl;
         }
+        std::cout << "------------------------------------" << std::endl;
     }
 
     return 0;
