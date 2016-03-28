@@ -33,9 +33,9 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
     minVal[R] = -1.0; // in femtometres
     // res discretizes the parameter space by giving the 'steps'
     // over which each vote should be given
-    res[A] = 0.01;
-    res[B] = 0.01;
-    res[R] = 0.01;
+    res[A] = 0.0001;
+    res[B] = 0.0001;
+    res[R] = 0.0001;
 
     houghSpace circlespace (res, maxVal, minVal);
 
