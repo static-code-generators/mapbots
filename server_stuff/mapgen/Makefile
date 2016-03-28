@@ -3,6 +3,7 @@ IDIR=include
 
 CXX=g++
 CXXFLAGS=-std=c++11 -O3 -I. -I$(IDIR)
+OPENCVFLAGS=`pkg-config --cflags --libs opencv`
 
 BUILDDIR=build
 
@@ -20,16 +21,16 @@ $(BUILDDIR)/houghmain.o: houghmain.cpp | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) -c houghmain.cpp -o $(BUILDDIR)/houghmain.o
 
 $(BUILDDIR)/houghcircle: $(BUILDDIR)/hough.o $(BUILDDIR)/houghcircle.o | $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) -g $(BUILDDIR)/hough.o $(BUILDDIR)/houghcircle.o -o $(BUILDDIR)/houghcircle
+	$(CXX) $(CXXFLAGS) $(BUILDDIR)/hough.o $(BUILDDIR)/houghcircle.o -o $(BUILDDIR)/houghcircle
 
 $(BUILDDIR)/houghcircle.o: houghcircle.cpp | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) -c houghcircle.cpp -o $(BUILDDIR)/houghcircle.o
 
 $(BUILDDIR)/opencv: $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o | $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
+	$(CXX) $(CXXFLAGS) $(OPENCVFLAGS) $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
 
 $(BUILDDIR)/opencv.o: opencv.cpp | $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` -c opencv.cpp -o $(BUILDDIR)/opencv.o
+	$(CXX) $(CXXFLAGS) -c opencv.cpp -o $(BUILDDIR)/opencv.o
 
 $(BUILDDIR)/hough.o: $(IDIR)/hough.h $(IDIR)/hough.cpp | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) -c $(IDIR)/hough.cpp -o $(BUILDDIR)/hough.o
