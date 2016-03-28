@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cassert>
 
-houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal) :
+houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal = std::vector<float>(numDim, 0)) :
     m_res (res),
     m_maxVal (maxVal)
 {
@@ -18,8 +18,19 @@ void houghSpace::initShape()
 {
     for (int i = 0; i < numDim; ++i) {
         // +1 because 0-indexing
-        m_shape[i] = ROUND(m_maxVal[i] / m_res[i]) + 1; 
+        m_shape[i] = ROUND((m_maxVal[i] - m_minVal[i]) / m_res[i]) + 1; 
     }
+}
+
+tableIndices houghSpace::indexOf(vector<float> cell)
+{
+    tableIndices idx;
+    for (int i = 0; i < numDim; ++i) {
+        assert(cell[i] >= m_minVal[i] && cell[i] <= m_maxVal[i]);
+        idx[i] = ROUND((cell[i] - m_minVal[i]) / res[i]);
+        assert(idx[i] < m_shape[i]);
+    }
+    return idx;
 }
 
 int houghSpace::isMaxima(tableIndices idx)
@@ -72,11 +83,7 @@ int houghSpace::isMaximaEdgeOnly(tableIndices idx)
 
 void houghSpace::addVote(std::vector<float> vote)
 {
-    tableIndices idx;
-    for (int i = 0; i < numDim; ++i) {
-        idx[i] = ROUND(vote[i] / m_res[i]);
-        assert(idx[i] <= m_shape[i]);
-    }
+    tableIndices idx = indexOf(vote);
     m_votingTable(idx)++;
 }
 

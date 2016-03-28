@@ -17,11 +17,13 @@ class houghSpace
 {
     std::vector<float> m_res;
     std::vector<float> m_maxVal;
+    std::vector<float> m_minVal;
     tableIndices m_shape;
     table m_votingTable; 
     void initShape();
     int isMaxima(tableIndices idx);
     int isMaximaEdgeOnly(tableIndices idx);
+    tableIndices indexOf(vector<float> cell);
 public:
     void printVotingTable(std::ostream &str);
     houghSpace(std::vector<float> res, std::vector<float> maxVal);
