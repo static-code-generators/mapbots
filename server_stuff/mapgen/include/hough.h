@@ -23,10 +23,10 @@ class houghSpace
     void initShape();
     int isMaxima(tableIndices idx);
     int isMaximaEdgeOnly(tableIndices idx);
-    tableIndices indexOf(vector<float> cell);
+    tableIndices indexOf(std::vector<float> cell);
 public:
     void printVotingTable(std::ostream &str);
-    houghSpace(std::vector<float> res, std::vector<float> maxVal);
+    houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal = std::vector<float>(numDim, 0));
     void addVote(std::vector<float> vote);
     std::vector< std::vector<float> > getMaxima(int threshold);
 };

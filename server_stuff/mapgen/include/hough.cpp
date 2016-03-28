@@ -5,10 +5,12 @@
 #include <iostream>
 #include <cassert>
 
-houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal = std::vector<float>(numDim, 0)) :
+houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal) :
     m_res (res),
-    m_maxVal (maxVal)
+    m_maxVal (maxVal),
+    m_minVal (minVal)
 {
+    assert(minVal.size() == numDim);
     initShape();
     m_votingTable.resize(m_shape);
     std::fill(m_votingTable.origin(), m_votingTable.origin() + m_votingTable.num_elements(), 0);
@@ -22,12 +24,12 @@ void houghSpace::initShape()
     }
 }
 
-tableIndices houghSpace::indexOf(vector<float> cell)
+tableIndices houghSpace::indexOf(std::vector<float> cell)
 {
     tableIndices idx;
     for (int i = 0; i < numDim; ++i) {
         assert(cell[i] >= m_minVal[i] && cell[i] <= m_maxVal[i]);
-        idx[i] = ROUND((cell[i] - m_minVal[i]) / res[i]);
+        idx[i] = ROUND((cell[i] - m_minVal[i]) / m_res[i]);
         assert(idx[i] < m_shape[i]);
     }
     return idx;
