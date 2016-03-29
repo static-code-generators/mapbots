@@ -2,16 +2,30 @@
 
 #include <vector>
 #include <iostream>
-#include <map>
-#include <set>
 #include <cassert>
-#include <algorithm>
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
 
 #define ROUND(x) (int)(x + 0.5)
 
 namespace helper
 {
     extern long long pow(long long a, unsigned int b);
+}
+
+namespace std
+{
+    template<>
+        struct hash < vector<int> > 
+        {
+            size_t operator()(const vector<int> &T) const
+            {
+                size_t temp = 42;
+                for (const int &i : T)
+                    boost::hash_combine(temp, i);
+                return temp;
+            }
+        };
 }
 
 class houghSpace
@@ -25,7 +39,7 @@ class houghSpace
     std::vector<float> cellOf(std::vector<int> idx);
     //return a vector of neighbours which are safe to access
     std::vector< std::vector<int> > neighbours(std::vector<int>);
-    std::map<std::vector<int>, int> m_votingTable;
+    std::unordered_map<std::vector<int>, int> m_votingTable;
     int isMaxima(std::vector<int> idx);
     public:
     //void printVotingTable(std::ostream &str);
