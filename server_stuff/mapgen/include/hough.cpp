@@ -84,25 +84,15 @@ int houghSpace::isMaxima(std::vector<int> idx)
 void houghSpace::addVote(std::vector<float> vote)
 {
     auto idx = indexOf(vote);
-    if (m_maxima.find(make_pair(m_votingTable[idx], idx)) != m_maxima.end())
-        m_maxima.erase(make_pair(m_votingTable[idx], idx));
-
     m_votingTable[idx]++;
-    if (isMaxima(idx)) {
-        m_maxima.insert(make_pair(m_votingTable[idx], idx));
-        for (auto &neighbour : neighbours(idx)) {
-            if (m_maxima.find(make_pair(m_votingTable[neighbour], neighbour)) != m_maxima.end())
-                m_maxima.erase(make_pair(m_votingTable[neighbour], neighbour));
-        }
-    }
 }
 
 std::vector< std::vector<float> > houghSpace::getMaxima(int threshold)
 {
     std::vector< std::vector<float> > maxima;
-    for (auto &cand : m_maxima)
-        if (cand.first >= threshold)
-            maxima.push_back(cellOf(cand.second));
+    for (auto &cand : m_votingTable)
+        if (cand.second >= threshold && isMaxima(cand.first))
+            maxima.push_back(cellOf(cand.first));
     return maxima;
 }
 
