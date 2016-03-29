@@ -3,10 +3,9 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <cmath>
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
-
-#define ROUND(x) (int)(x + 0.5)
 
 namespace helper
 {

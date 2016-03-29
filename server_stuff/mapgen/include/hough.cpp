@@ -25,7 +25,7 @@ houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal, std::v
         m_minVal.resize(m_numDim, 0);
     m_indexRange.resize(m_numDim, 0);
     for (int i = 0; i < m_numDim; ++i)
-        m_indexRange[i] = ROUND((m_maxVal[i] - m_minVal[i]) / m_res[i]);
+        m_indexRange[i] = std::lround((m_maxVal[i] - m_minVal[i]) / m_res[i]);
 }
 
 std::vector<int> houghSpace::indexOf(std::vector<float> cell)
@@ -33,7 +33,7 @@ std::vector<int> houghSpace::indexOf(std::vector<float> cell)
     std::vector<int> idx(m_numDim, 0);
     for (int i = 0; i < m_numDim; ++i) {
         assert(cell[i] >= m_minVal[i] && cell[i] <= m_maxVal[i]);
-        idx[i] = ROUND((cell[i] - m_minVal[i]) / m_res[i]);
+        idx[i] = std::lround((cell[i] - m_minVal[i]) / m_res[i]);
         assert(idx[i] <= m_indexRange[i] && idx[i] >= 0);
     }
     return idx;
