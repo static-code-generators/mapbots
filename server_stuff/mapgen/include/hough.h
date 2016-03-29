@@ -12,6 +12,8 @@ namespace helper
     extern long long pow(long long a, unsigned int b);
 }
 
+//read http://www.cplusplus.com/reference/unordered_map/unordered_map/
+//if you don't understand why this exists
 namespace std
 {
     template<>
