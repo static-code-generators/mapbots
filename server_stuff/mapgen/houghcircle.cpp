@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cassert>
 #include <cmath>
+#include <chrono>
+#include <iomanip>
 
 #define A 0
 #define B 1
@@ -30,7 +32,7 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
 
     minVal[A] = -1.0; // in femtometres
     minVal[B] = -1.0; // in femtometres
-    minVal[R] = -1.0; // in femtometres
+    minVal[R] = 0.0; // in femtometres
     // res discretizes the parameter space by giving the 'steps'
     // over which each vote should be given
     res[A] = 0.0001;
@@ -46,7 +48,7 @@ houghSpace addVotes(std::vector< std::pair<float, float> > readings)
     for (auto &p: readings) {
         for (float theta = 0; theta <= 2 * M_PI; theta += M_PI/180) {
             float incrR; // this is for looping over the entire range of possible values for the radius
-            for(incrR = 0.0; incrR <= maxVal[R]; incrR += res[R]) {
+            for(incrR = minVal[R]; incrR <= maxVal[R]; incrR += res[R]) {
                 vote[R] = incrR;
                 vote[A] = p.first - incrR * cosf(theta);
                 vote[B] = p.second - incrR * sinf(theta);
@@ -84,6 +86,8 @@ int main(int argc, char **argv)
 
         std::vector< std::pair<float, float> > coords;
 
+        auto start = std::chrono::system_clock::now();
+
         long int j;
         for(j = 0; j < nofPoints; j++)
         {
@@ -91,6 +95,7 @@ int main(int argc, char **argv)
             std::cin >> coord;
             // Checking for rogue test data
             float epsilon = 0.001;
+
             if(std::abs(coord.first) + epsilon <= 1.0 && std::abs(coord.second) + epsilon <= 1.0)
                 coords.push_back(coord);
         }
@@ -98,12 +103,18 @@ int main(int argc, char **argv)
         houghSpace circlespace = addVotes(coords);
         std::vector< std::vector<float> > vec (circlespace.getMaxima(atoi(argv[1])));
 
+        auto end = std::chrono::system_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
         std::cout << "Test case: " << i << std::endl;
+        std::cout << std::fixed << std::setprecision(6);
         for(auto &p: vec) {
-            std::cout << p[0] << " "
-                      << p[1] << " "
-                      << p[2] << std::endl;
+            std::cout << "A: " << p[A] << " "
+                      << "B: " << p[B] << " "
+                      << "R: " << p[R] << std::endl;
         }
+        std::cout << "------------------------------------" << std::endl;
+        std::cout << "Time elapsed for test case " << i << ": " <<  elapsed.count() << std::endl;
         std::cout << "------------------------------------" << std::endl;
     }
 
