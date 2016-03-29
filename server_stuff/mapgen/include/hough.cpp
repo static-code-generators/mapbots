@@ -1,157 +1,128 @@
 #include "hough.h"
-#include "boost/multi_array.hpp"
-#include "boost/math/special_functions/pow.hpp"
-#include <vector>
-#include <iostream>
-#include <cassert>
+
+namespace helper
+{
+    long long pow(long long a, unsigned int b)
+    {
+        long long ans = 1, res = a;
+        while (b > 0) {
+            if (b % 2)
+                ans *= res;
+            res *= res;
+            b /= 2;
+        }
+        return ans;
+    }
+}
 
 houghSpace::houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal) :
     m_res (res),
     m_maxVal (maxVal),
     m_minVal (minVal)
 {
-    assert(minVal.size() == numDim);
-    initShape();
-    m_votingTable.resize(m_shape);
-    std::fill(m_votingTable.origin(), m_votingTable.origin() + m_votingTable.num_elements(), 0);
+    m_numDim = res.size();
+    if(m_minVal.size() != m_numDim)
+        m_minVal.resize(m_numDim, 0);
+    m_indexRange.resize(m_numDim, 0);
+    for (int i = 0; i < m_numDim; ++i)
+        m_indexRange[i] = ROUND((m_maxVal[i] - m_minVal[i]) / m_res[i]);
 }
 
-void houghSpace::initShape()
+std::vector<int> houghSpace::indexOf(std::vector<float> cell)
 {
-    for (int i = 0; i < numDim; ++i) {
-        // +1 because 0-indexing
-        m_shape[i] = ROUND((m_maxVal[i] - m_minVal[i]) / m_res[i]) + 1; 
-    }
-}
-
-tableIndices houghSpace::indexOf(std::vector<float> cell)
-{
-    tableIndices idx;
-    for (int i = 0; i < numDim; ++i) {
+    std::vector<int> idx(m_numDim, 0);
+    for (int i = 0; i < m_numDim; ++i) {
         assert(cell[i] >= m_minVal[i] && cell[i] <= m_maxVal[i]);
         idx[i] = ROUND((cell[i] - m_minVal[i]) / m_res[i]);
-        assert(idx[i] < m_shape[i]);
-        //assert(idx[i] >= 0);
+        assert(idx[i] <= m_indexRange[i] && idx[i] >= 0);
     }
     return idx;
 }
 
-int houghSpace::isMaxima(tableIndices idx)
+std::vector<float> houghSpace::cellOf(std::vector<int> idx)
 {
-    int indexDiff[3] = {-1, 0, 1};
-    long long bound = boost::math::pow<numDim>(3);
-    tableIndices neighbour = idx;
+    std::vector<float> cell(m_numDim, 0);
+    for (int i = 0; i < m_numDim; ++i) {
+        cell[i] = m_minVal[i] + idx[i] * m_res[i];
+    }
+    return cell;
+}
+
+std::vector< std::vector<int> > houghSpace::neighbours(std::vector<int> idx)
+{
     //iterate over all neighbours
-    //this makes sense because all neighbours have at most numDim indices
+    //this makes sense because all neighbours have at most m_numDim indices
     //different with a diff in range {-1, 0, 1} which has size 3
     //please email parth15069@iiitd.ac.in if this doesn't make sense
+    int indexDiff[3] = {-1, 0, 1};
+    long long bound = helper::pow(3, m_numDim);
+    std::vector<int> neighbour(m_numDim, 0);
+    std::vector< std::vector<int> > ans;
     for(long long incr = 0; incr < bound; ++incr) {
         long long temp = incr;
         int safe = 1;
-        for (int i = 0; i < numDim; ++i) {
+        for (int i = 0; i < m_numDim; ++i) {
             neighbour[i] = idx[i] + indexDiff[temp % 3]; 
-            if (neighbour[i] >= m_shape[i] || neighbour[i] < 0)
+            if (neighbour[i] > m_indexRange[i] || neighbour[i] < 0)
                 safe = 0;
             temp /= 3;
         }
-        if (safe && neighbour != idx && m_votingTable(neighbour) >= m_votingTable(idx)) {
-            return 0;
-        }
+        if (safe && !(neighbour == idx))
+            ans.push_back(neighbour);
     }
-    return 1;
+    return ans;
 }
 
-int houghSpace::isMaximaEdgeOnly(tableIndices idx)
+int houghSpace::isMaxima(std::vector<int> idx)
 {
-    int indexDiff[3] = {-1, 0, 1};
-    long long bound = boost::math::pow<numDim>(3);
-    tableIndices neighbour = idx;
-    for(long long incr = 0; incr < bound; ++incr) {
-        long long temp = incr;
-        int safe = 1, sharesEdge = 0;
-        for (int i = 0; i < numDim; ++i) {
-            neighbour[i] = idx[i] + indexDiff[temp % 3]; 
-            if (neighbour[i] >= m_shape[i] || neighbour[i] < 0)
-                safe = 0;
-            if (neighbour[i] == idx[i])
-                sharesEdge = 1;
-            temp /= 3;
-        }
-        if (safe && sharesEdge && neighbour != idx && m_votingTable(neighbour) >= m_votingTable(idx)) {
+    for (auto &neighbour : neighbours(idx))
+        if (m_votingTable[neighbour] >= m_votingTable[idx]) 
             return 0;
-        }
-    }
     return 1;
 }
 
 void houghSpace::addVote(std::vector<float> vote)
 {
-    tableIndices idx = indexOf(vote);
-    m_votingTable(idx)++;
+    auto idx = indexOf(vote);
+    m_votingTable[idx]++;
 }
-
-table::index getIndex(const table& m, const float* requestedElement, const unsigned short int direction)
-{
-    int offset = requestedElement - m.origin();
-    return(offset / m.strides()[direction] % m.shape()[direction] +  m.index_bases()[direction]); 
-}
-
-tableIndices getIndexArray(const table& m, const float* requestedElement)
-{
-    tableIndices _idx;
-    for (unsigned int dir = 0; dir < numDim; dir++)
-    {
-        _idx[dir] = getIndex(m, requestedElement, dir);
-    }
-    return _idx;
-}
-
 
 std::vector< std::vector<float> > houghSpace::getMaxima(int threshold)
 {
     std::vector< std::vector<float> > maxima;
-    std::vector<float> currMaxima (numDim);
-    auto p = m_votingTable.data();
-    for (int i = 0; i < m_votingTable.num_elements(); ++i) {
-        tableIndices idx = getIndexArray(m_votingTable, p);
-        if(isMaxima(idx) && m_votingTable(idx) >= threshold) {
-            for (int i = 0; i < numDim; ++i) {
-                currMaxima[i] = idx[i] * m_res[i];
-            }
-            maxima.push_back(currMaxima);
-        }
-        ++p;
-    }
+    for (auto &cand : m_votingTable)
+        if (cand.second >= threshold && isMaxima(cand.first))
+            maxima.push_back(cellOf(cand.first));
     return maxima;
 }
 
 /*void houghSpace::printVotingTable(std::ostream &str)*/
 //{
-    //str     << std::fixed 
-            //<< std::setprecision(2) 
-            //<< std::setfill(' ');
-    //[> this function assumes a 2d hough-space, is not 
-    //good idea to use this in production */
-    //assert(numDim == 2);
+//str     << std::fixed 
+//<< std::setprecision(2) 
+//<< std::setfill(' ');
+///* this function assumes a 2d hough-space, is not 
+//good idea to use this in production */
+//assert(m_numDim == 2);
 
-    //for (int i = -1; i < m_shape[0]; ++i) {
-        //for (int j = -1; j < m_shape[1]; ++j) {
-            //str << std::setw(6);
-            //if (i == -1 && j == -1)
-                //str << 0;
-            //else if (i == -1)
-                //str << j * m_res[1];
-            //else if (j == -1)
-                //str << i * m_res[0];
-            //else
-                //str << m_votingTable[i][j];
-        //}
-        //str << std::endl;
-    //}
+//for (int i = -1; i < m_shape[0]; ++i) {
+//for (int j = -1; j < m_shape[1]; ++j) {
+//str << std::setw(6);
+//if (i == -1 && j == -1)
+//str << 0;
+//else if (i == -1)
+//str << j * m_res[1];
+//else if (j == -1)
+//str << i * m_res[0];
+//else
+//str << m_votingTable[i][j];
+//}
+//str << std::endl;
+//}
 //}
 
 //std::ostream& operator<<(std::ostream &str, houghSpace &hs)
 //{
-    //hs.printVotingTable(str);
-    //return str;
+//hs.printVotingTable(str);
+//return str;
 /*}*/

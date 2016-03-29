@@ -1,37 +1,51 @@
 #pragma once
 
-#include "boost/multi_array.hpp"
-#include "boost/math/special_functions/pow.hpp"
 #include <vector>
 #include <iostream>
 #include <cassert>
-
-const int numDim = 3;
-
-typedef boost::multi_array<float, numDim> table;
-typedef boost::array<table::index, numDim> tableIndices; // numDim-dimensional vector
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
 
 #define ROUND(x) (int)(x + 0.5)
 
+namespace helper
+{
+    extern long long pow(long long a, unsigned int b);
+}
+
+namespace std
+{
+    template<>
+        struct hash < vector<int> > 
+        {
+            size_t operator()(const vector<int> &T) const
+            {
+                size_t temp = 42;
+                for (const int &i : T)
+                    boost::hash_combine(temp, i);
+                return temp;
+            }
+        };
+}
+
 class houghSpace
 {
+    unsigned int m_numDim;
     std::vector<float> m_res;
     std::vector<float> m_maxVal;
     std::vector<float> m_minVal;
-    tableIndices m_shape;
-    table m_votingTable; 
-    void initShape();
-    int isMaxima(tableIndices idx);
-    int isMaximaEdgeOnly(tableIndices idx);
-    tableIndices indexOf(std::vector<float> cell);
-public:
-    void printVotingTable(std::ostream &str);
-    houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal = std::vector<float>(numDim, 0));
+    std::vector<int> m_indexRange; //for sanity checking indices calculated
+    std::vector<int> indexOf(std::vector<float> cell);
+    std::vector<float> cellOf(std::vector<int> idx);
+    //return a vector of neighbours which are safe to access
+    std::vector< std::vector<int> > neighbours(std::vector<int>);
+    std::unordered_map<std::vector<int>, int> m_votingTable;
+    int isMaxima(std::vector<int> idx);
+    public:
+    //void printVotingTable(std::ostream &str);
+    houghSpace(std::vector<float> res, std::vector<float> maxVal, std::vector<float> minVal = std::vector<float>(2, 0));
     void addVote(std::vector<float> vote);
     std::vector< std::vector<float> > getMaxima(int threshold);
 };
-
-table::index getIndex(const table& m, const float* requestedElement, const unsigned short int direction);
-tableIndices getIndexArray(const table& m, const float* requestedElement);
 
 //std::ostream& operator<<(std::ostream &str, houghSpace &hs);
