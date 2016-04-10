@@ -8,4 +8,4 @@
 
 ###bylaws
 * a maintainer may only push to branches they created
-* a maintainer may branch off another maintainer's branch to add features/fixes, and then send a PR to the branch they branched off
+* a maintainer may branch off another maintainer's branch to add features/fixes, and then send a PR to the branch they branched off from
