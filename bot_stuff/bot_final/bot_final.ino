@@ -4,14 +4,13 @@
 #include "Constants.h"
 #include "Sensor.h"
 
+#define M_PI 3.14159265358979323846
 // Final Arduino code for mapbot
 
 /*
 TODO:
-* Add x-y displacement of bot wrt origin
 * Add angle of 24 sensors wrt origin
 * Add final takeMultipleReadings() function to Sensor.h header
-* Add sendReadings() function for properly formatting the sent data
 */
 
 enum direction
@@ -26,16 +25,24 @@ enum direction
 // so are your mother's boobs
 // constant values
 const float obstacleAvoidDist = 300; // maximum distance of obstacle at which bot should avoid obstacle
-const rightAngleDelay = 800; // delay in milliseconds required for bot to turn 90 degrees
+const int rightAngleDelay = 800; // delay in milliseconds required for bot to turn 90 degrees
 
 // global variables for usage across functions
-double currSide = sideIncr;
 direction currDir = NORTH; // currDir is orientation wrt origin, assuming that robot starts in NORTH direction
 direction pendingDir = EAST;
 int obstacleFound = 0; // flag for checking whether obstacle was found in path of bot
 
+/*
+* contains readings from sensors, the angles wrt. present orientation look like
+* A = {{0, 45, 90, 135, 180, 225, 270, 315},
+* {15, 60, 105, 150, 195, 240, 285, 330},
+* {30, 75, 120, 165, 210, 255, 300, 345}}
+* so distMatrix[i][j] = distance at angle(A[i][j])
+*/
+float distMatrix[3][8];
+
 //Bot position(where we are)
-float xPos = 0; //millimeters
+float xPos = 0;
 float yPos = 0;
 
 float straightLineDist = 0;
@@ -45,8 +52,10 @@ Servo myservo;
 
 // move distance dist forward
 void moveDistance(double dist);
+// turn 90-degrees left
 void turnLeft();
-float findObstacleDist(direction currDir);
+float findObstacleDist();
+void updatePos(float distanceTravelled);
 
 void setup()
 {
@@ -67,36 +76,23 @@ void setup()
 
 void loop()
 {
-    while (obstacleFound == 1 || straightLineDist > 6000) {
+    while (obstacleFound == 1 || straightLineDist > 2048.0) {
         turnLeft();
-        obstacleFound = (findObstacleDistance() < obstacleAvoidDistance);
+//        takeMultipleReadings();
+        obstacleFound = (distMatrix[0][0] < obstacleAvoidDist);
         straightLineDist = 0;
     }
 
     moveDistance(unitDist);
-    takeMultipleReadings();
+    straightLineDist += unitDist;
+//    takeMultipleReadings();
     sendReadings();
     delay(1000);
 }
 
-//returns forward distance in mm
-float findObstacleDist()
+void updatePos(float distanceTravelled)
 {
-    float obstacleDist;
-    switch(currDir) {
-        // still need to fill in sensor numbers from matrix
-        case NORTH: obstacleDist = distMatrix[1][]; break;
-        case EAST: obstacleDist = distMatrix[1][]; break;
-        case SOUTH: obstacleDist = distMatrix[1][]; break;
-        case WEST: obstacleDist = distMatrix[1][]; break;
-    }
-    return obstacleDist;
-}
-
-void updatePos(direction currDir, int numPulses)
-{
-    float distanceTravelled = numPulses * distPerPulse;
-    case(currDir) {
+    switch (currDir) {
         case NORTH: yPos += distanceTravelled; break;
         case EAST: xPos += distanceTravelled; break;
         case SOUTH: yPos -= distanceTravelled; break;
@@ -118,24 +114,23 @@ void sendReadings()
     Serial.println(yPos);
 
     // Now printing sensor theta along with sensor data
+    // all angles in radians now
+    // be careful, the code above talks in degrees at times
     int i, j;
-    int sensorTheta = 0;
-    int shiftTheta;
-    case(currDir) {
-        case NORTH: shiftTheta = ; break;
-        case EAST: shiftTheta = ; break;
-        case SOUTH: shiftTheta = ; break;
-        case WEST: shiftTheta = ; break;
-    }
+    float sensorTheta = 0;
+    float shiftOfDir[4] = {0.0, M_PI / 2, M_PI, (3 * M_PI) / 2};
+    float shiftTheta = shiftOfDir[currDir];
 
     for(i = 0; i < numSens; i++) {
         for(j = 0; j < 3; j++) {
-            Serial.print("theta: "); Serial.print(sensorTheta + shiftTheta);
+            Serial.print("theta: ");
+            Serial.print(sensorTheta + shiftTheta);
             Serial.print(" ");
-            Serial.print
-            sensorTheta += 15;
+            Serial.println(distMatrix[i][j]);
+            sensorTheta += 15 * (180.0 / M_PI); 
         }
     }
+    Serial.println("readings for this batch complete, madafaka");
 }
 
 void moveDistance(double dist) {
