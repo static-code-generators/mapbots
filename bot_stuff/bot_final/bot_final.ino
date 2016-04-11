@@ -16,10 +16,10 @@ TODO:
 
 enum direction
 {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3
 };
 
 // constant values
@@ -33,6 +33,10 @@ double currSide = sideIncr;
 direction currDir = NORTH; // currDir is orientation wrt origin, assuming that robot starts in NORTH direction
 direction pendingDir = EAST;
 int obstacleFound = 0; // flag for checking whether obstacle was found in path of bot
+
+// Global position attributes of bot
+float xPos = 0;
+float yPos = 0;
 
 Servo myservo;
 
@@ -140,7 +144,10 @@ void moveSpiralDistance(direction currDir, direction pendingDir, long double sid
         }
         numPulses++;
     }
+
+    updatePos(currDir, numPulses);
     stahp();
+    delay(500);
 }
 
 
@@ -156,7 +163,7 @@ void movePendingDistance(direction currDir, direction pendingDir)
         int numPulses = 0;
 
         float obstacleDist;
-        while((obstacleDist = findObstacleDist(currDir)) <= findObstacleDist)
+        while((obstacleDist = findObstacleDist(currDir)) <= obstacleAvoidDist)
         {
             if(numPulses >= stepPulses)
             {
@@ -186,11 +193,12 @@ void movePendingDistance(direction currDir, direction pendingDir)
             delay(50);
         }
 
+        updatePos(currDir, numPulses);
         obstacleFound = 0;
-        float distPendingTravelled = numPulses / distPerPulse; // this is for later use for x-y coords
         currDir = pendingDir;
         pendingDir = (currDir + 1) % 4;
         stahp();
+        delay(500);
     }
     else
         Serial.println("You screwed up m8.") // no provision for asserts unfortunately, so.
@@ -208,4 +216,53 @@ float findObstacleDist(direction currDir)
         case WEST: obstacleDist = distMatrix[1][]; break;
     }
     return obstacleDist;
+}
+
+void updatePos(direction currDir, int numPulses)
+{
+    float distanceTravelled = numPulses / distPerPulse;
+    case(currDir)
+    {
+        case NORTH: yPos += distanceTravelled; break;
+        case EAST: xPos += distanceTravelled; break;
+        case SOUTH: yPos -= distanceTravelled; break;
+        case WEST: xPos -= distanceTravelled; break;
+    }
+}
+
+void sendReadings()
+{
+    // Units for data:
+    // x-y coords: in cm
+    // sensor theta: in degrees
+
+    // Printing x-y coords
+    Serial.print("x: ");
+    Serial.print(xPos);
+    Serial.print(" ");
+    Serial.print("y: ");
+    Serial.println(yPos);
+
+    // Now printing sensor theta along with sensor data
+    int i, j;
+    int sensorTheta = 0;
+    int shiftTheta;
+    case(currDir)
+    {
+        case NORTH: shiftTheta = ; break;
+        case EAST: shiftTheta = ; break;
+        case SOUTH: shiftTheta = ; break;
+        case WEST: shiftTheta = ; break;
+    }
+
+    for(i = 0; i < numSens; i++)
+    {
+        for(j = 0; j < 3; j++)
+        {
+            Serial.print("theta: "); Serial.print(sensorTheta + shiftTheta);
+            Serial.print(" ");
+            Serial.print
+            sensorTheta += 15;
+        }
+    }
 }
