@@ -22,10 +22,10 @@ enum direction
     WEST = 3
 };
 
+// all distances are in millimeters, unless otherwise specified
+// so are your mother's boobs
 // constant values
-const forwardStepDist = 25; // sensor readings will be taken at every forwardStepDist cm
-const double sideIncr = 25; // side of rectangular spiral will be incremented by sideIncr every loop
-const float obstacleAvoidDist = 0.30; // maximum distance of obstacle at which bot should avoid obstacle
+const float obstacleAvoidDist = 300; // maximum distance of obstacle at which bot should avoid obstacle
 const rightAngleDelay = 800; // delay in milliseconds required for bot to turn 90 degrees
 
 // global variables for usage across functions
@@ -34,21 +34,19 @@ direction currDir = NORTH; // currDir is orientation wrt origin, assuming that r
 direction pendingDir = EAST;
 int obstacleFound = 0; // flag for checking whether obstacle was found in path of bot
 
-// Global position attributes of bot
-float xPos = 0;
+//Bot position(where we are)
+float xPos = 0; //millimeters
 float yPos = 0;
+
+float straightLineDist = 0;
+float unitDist = 50;
 
 Servo myservo;
 
-// this function is for when the bot is moving along the predefined spiral
-void moveSpiralDistance(direction currDir, direction pendingDir, long double sideDist);
-// this function is for when the bot has encountered an obstacle
-// and is now in 'pending' state; ie. it is looking for the
-// next opening to join back into the spiral
-void movePendingDistance(direction currDir, direction pendingDir);
-// utility function for finding distance to obstacle depending on orientation of bot
+// move distance dist forward
+void moveDistance(double dist);
+void turnLeft();
 float findObstacleDist(direction currDir);
-
 
 void setup()
 {
@@ -69,146 +67,23 @@ void setup()
 
 void loop()
 {
-    if(obstacleFound == 0)
-    {
-        moveSpiralDistance(currDir, pendingDir, currSide);    
-        currSide += sideIncr;
-        moveRight();
-        delay(rightAngleDelay);
-    }
-    else if(obstacleFound == 1)
-    {
-        movePendingDistance(currDir, pendingDir);
-        moveRight(); 
-        // turn back to direction when bot first encountered obstacle
-        // so 270 degrees turn needed
-        delay(3 * rightAngleDelay);
+    while (obstacleFound == 1 || straightLineDist > 6000) {
+        turnLeft();
+        obstacleFound = (findObstacleDistance() < obstacleAvoidDistance);
+        straightLineDist = 0;
     }
 
-    stahp();
+    moveDistance(unitDist);
     takeMultipleReadings();
     sendReadings();
     delay(1000);
 }
 
-
-void moveSpiralDistance(direction currDir, direction pendingDir, long double sideDist)
-{
-    moveForward();
-
-    int reqPulses = sideDist / distPerPulse;
-    int discrPulses = forwardStepDist / distPerPulse;
-
-    int stepPulses = discrPulses;
-    int numPulses = 0;
-
-    Serial.print("target: ");
-    Serial.println(reqPulses);
-
-    while(obstacleFound != 1 && numPulses < reqPulses)
-    {
-        Serial.print("numPulses: ");
-        Serial.println(numPulses);
-
-        if(numPulses >= stepPulses)
-        {
-            stahp();
-            takeMultipleReadings();
-            sendReadings();
-            delay(250);
-            float obstacleDist = findObstacleDist(currDir);
-            
-            if(obstacleDist <= obstacleAvoidDist)
-            {
-                pendingDir = currDir;
-                currDir = (currDir + 1) % 4;
-                obstacleFound = 1;
-                break;
-            }
-            stepPulses += discrPulses;
-            moveForward();
-        }
-
-        int initState = digitalRead(encL);
-        int currState;
-
-        // The following 2 while loops make sure that the wheel
-        // has turned through a solid slat and an empty slat
-        while((currState = digitalRead(encL)) == initState)
-        {
-            delay(10);
-        }
-        while((currState = digitalRead(encL)) != initState)
-        {
-            delay(10);
-        }
-        numPulses++;
-    }
-
-    updatePos(currDir, numPulses);
-    stahp();
-    delay(500);
-}
-
-
-void movePendingDistance(direction currDir, direction pendingDir)
-{
-    if(obstacleFound == 1) 
-    {
-        moveForward();
-        
-        int discrPulses = forwardStepDist / distPerPulse;
-        int stepPulses = discrPulses;
-
-        int numPulses = 0;
-
-        float obstacleDist;
-        while((obstacleDist = findObstacleDist(currDir)) <= obstacleAvoidDist)
-        {
-            if(numPulses >= stepPulses)
-            {
-                stahp();
-                takeMultipleReadings();
-                sendReadings();
-                delay(250);
-                stepPulses += discrPulses;
-                moveForward();
-            }
-
-            int initState = digitalRead(encL);
-            int currState;
-
-            // The following 2 while loops make sure that the wheel
-            // has turned through a solid slat and an empty slat
-            while((currState = digitalRead(encL)) == initState)
-            {
-                delay(10);
-            }
-            while((currState = digitalRead(encL)) != initState)
-            {
-                delay(10);
-            }
-            numPulses++;
-
-            delay(50);
-        }
-
-        updatePos(currDir, numPulses);
-        obstacleFound = 0;
-        currDir = pendingDir;
-        pendingDir = (currDir + 1) % 4;
-        stahp();
-        delay(500);
-    }
-    else
-        Serial.println("You screwed up m8.") // no provision for asserts unfortunately, so.
-}
-
-float findObstacleDist(direction currDir)
+//returns forward distance in mm
+float findObstacleDist()
 {
     float obstacleDist;
-    switch(currDir)
-    {
+    switch(currDir) {
         // still need to fill in sensor numbers from matrix
         case NORTH: obstacleDist = distMatrix[1][]; break;
         case EAST: obstacleDist = distMatrix[1][]; break;
@@ -220,9 +95,8 @@ float findObstacleDist(direction currDir)
 
 void updatePos(direction currDir, int numPulses)
 {
-    float distanceTravelled = numPulses / distPerPulse;
-    case(currDir)
-    {
+    float distanceTravelled = numPulses * distPerPulse;
+    case(currDir) {
         case NORTH: yPos += distanceTravelled; break;
         case EAST: xPos += distanceTravelled; break;
         case SOUTH: yPos -= distanceTravelled; break;
@@ -247,22 +121,50 @@ void sendReadings()
     int i, j;
     int sensorTheta = 0;
     int shiftTheta;
-    case(currDir)
-    {
+    case(currDir) {
         case NORTH: shiftTheta = ; break;
         case EAST: shiftTheta = ; break;
         case SOUTH: shiftTheta = ; break;
         case WEST: shiftTheta = ; break;
     }
 
-    for(i = 0; i < numSens; i++)
-    {
-        for(j = 0; j < 3; j++)
-        {
+    for(i = 0; i < numSens; i++) {
+        for(j = 0; j < 3; j++) {
             Serial.print("theta: "); Serial.print(sensorTheta + shiftTheta);
             Serial.print(" ");
             Serial.print
             sensorTheta += 15;
         }
     }
+}
+
+void moveDistance(double dist) {
+    moveForward();
+    int reqPulses = dist / distPerPulse;
+    int numPulses = 0;
+    Serial.print("target: ");
+    Serial.println(reqPulses);
+    while (numPulses < reqPulses) {
+        int initValue = digitalRead(encL);
+        int currValue;
+
+        Serial.print("HM: ");
+        Serial.println(numPulses);
+
+        while((currValue = digitalRead(encL)) == initValue) {
+            delay(10);
+        }
+        while((currValue = digitalRead(encL)) != initValue) {
+            delay(10);
+        }
+        ++numPulses;
+    }
+    stahp();
+}
+
+void turnLeft()
+{
+    moveLeft();
+    delay(rightAngleDelay);    
+    stahp();
 }
