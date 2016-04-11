@@ -78,14 +78,14 @@ void loop()
 {
     while (obstacleFound == 1 || straightLineDist > 2048.0) {
         turnLeft();
-//        takeMultipleReadings();
+        takeMultipleReadings();
         obstacleFound = (distMatrix[0][0] < obstacleAvoidDist);
         straightLineDist = 0;
     }
 
     moveDistance(unitDist);
     straightLineDist += unitDist;
-//    takeMultipleReadings();
+    takeMultipleReadings();
     sendReadings();
     delay(1000);
 }
