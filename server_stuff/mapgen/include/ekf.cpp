@@ -1,23 +1,4 @@
-#include <iostream>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
-//#define BOOST_UBLAS_NDEBUG
-
-namespace ublas = boost::numeric::ublas;
-typedef ublas::matrix<double> matrix_type;
-typedef ublas::matrix<matrix_type> matrix_of_matrix_type;
-
-matrix_of_matrix_type prod_local(matrix_of_matrix_type A, matrix_of_matrix_type B);
-
-template <typename F, typename... Args>
-matrix_of_matrix_type jacobian(F h, ublas::vector< ublas::vector<double> > x, Args... args);
-
-int main()
-{
-    matrix_of_matrix_type A(10, 10, ublas::identity_matrix<double>(3)), B = A;
-    matrix_type C = ublas::identity_matrix<double>(3), D = C;
-}
+#include "ekf.hpp"
 
 matrix_of_matrix_type prod_local(matrix_of_matrix_type A, matrix_of_matrix_type B)
 {
@@ -32,19 +13,30 @@ matrix_of_matrix_type prod_local(matrix_of_matrix_type A, matrix_of_matrix_type 
     return C;
 }
 
+template<typename T>
+bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n)
+{
+    bool returnValue = 
+        (m.size1() == n.size1()) &&
+        (m.size2() == n.size2());
+
+    if (returnValue)
+    {
+        for (unsigned int i = 0; returnValue && i < m.size1(); ++i)
+        {
+            for (unsigned int j = 0; returnValue && j < m.size2(); ++j)
+            {
+                returnValue &= m(i,j) == n(i,j);
+            }
+        }
+    }
+    return returnValue;
+}
+
 template <typename F, typename... Args>
-/**
- * @brief computes the Jacobian of the function h evaluated at x
- *
- * @param h the function for which the Jacobian is to be computed. Must accept x and args, must return type ublas::vector< ublas::vector<double> >
- * @param x the value at which the Jacobain is to be computed.
- * @param args additional arguments that the function h requires
- *
- * @return a m * n matrix_of_matrix_type where m is the dimension of the output of h, and n is the dimension of x. Notice, that since x may be a vector of vectors, each element of the returned value is not a scalar, it is a matrix <double>. 
- */
 matrix_of_matrix_type jacobian(F h, ublas::vector< ublas::vector<double> > x, Args... args)
 {
-    auto y = F(x, args...);
+    vector_of_vector_type y = h(x, args...);
     unsigned n = x.size(), m = y.size();
     matrix_of_matrix_type H(n, m);
 
@@ -62,11 +54,15 @@ matrix_of_matrix_type jacobian(F h, ublas::vector< ublas::vector<double> > x, Ar
             //compute and store in yDelta
             //the partial derivative of F(x) with respect
             //to x[i][k]
-            x[i][k] = x[i][k] + delta;
-            auto yDelta = F(x, args...) - y;
-            yDelta /= delta;
-            x[i][k] = x[i][k] - delta;
-            
+
+            x(i)(k) += delta;
+            vector_of_vector_type yDelta = h(x, args...) - y;
+            for (unsigned j = 0; j < m; ++j) {
+                yDelta(j) /= delta;
+            }
+            x(i)(k) -= delta;
+
+
             //now, since yDelta contains the derivative for
             //h(x)_{0...m - 1}, with respect to x[i][k]
             //we update for all j in 0...m - 1 H(i, j)_(k, l)
