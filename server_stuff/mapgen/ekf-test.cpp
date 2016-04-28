@@ -1,4 +1,4 @@
-#include "ekf.h"
+#include "ekf.hpp"
 
 vector_of_vector_type testIdentity(vector_of_vector_type x)
 {
@@ -10,8 +10,8 @@ int main()
     vector_of_vector_type x(10, vector_type(3, 7));
     matrix_of_matrix_type J = jacobian(testIdentity, x);
 
-    matrix_type I = ublas::identity_matrix(3);
-    matrix_type O = ublas::identity_matrix(3, 3);
+    matrix_type I = ublas::identity_matrix<double>(3);
+    matrix_type O = ublas::zero_matrix<double>(3, 3);
 
     for (int i = 0; i < 10; ++i)
         for (int j = 0; j < 10; ++j) {
@@ -23,4 +23,5 @@ int main()
                 assert(J(i, j) == O);
             }
         }
+    std::cout << "The test has passed." << std::endl;
 }
