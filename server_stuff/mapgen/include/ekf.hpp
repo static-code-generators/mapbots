@@ -31,3 +31,5 @@ matrix_of_matrix_type jacobian(F h, vector_of_vector_type x, Args... args);
 
 template<typename T>
 bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n);
+
+#include "ekf.tpp"
