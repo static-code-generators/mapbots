@@ -7,7 +7,6 @@
 #define M_PI 3.14159265358979323846
 // Final Arduino code for mapbot
 
-
 enum direction
 {
     NORTH = 0,
@@ -179,7 +178,7 @@ void takeReading(int row)
     for(i = 0; i < numSens; i++)
         distMatrix[row][i] = 0.0;
 
-    scan(distMatrix[row]); // scan(float distCm[])
+    scanAll(distMatrix[row]); // scanAll(float distCm[])
 
     delay(1000);
 }
