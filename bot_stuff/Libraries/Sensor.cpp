@@ -3,7 +3,7 @@
 
 float singleSensorReading(int sensor);
 
-void scan(float distCm[])
+void scanAll(float distCm[])
 {
     int i;
     for(i = 0; i < numSens; i++)
