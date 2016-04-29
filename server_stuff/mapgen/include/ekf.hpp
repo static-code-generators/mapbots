@@ -27,7 +27,7 @@ template <typename F, typename... Args>
  *
  * @return a m * n matrix_of_matrix_type where m is the dimension of the output of h, and n is the dimension of x. Notice, that since x may be a vector of vectors, each element of the returned value is not a scalar, it is a matrix <double>. 
  */
-matrix_of_matrix_type jacobian(F h, ublas::vector< ublas::vector<double> > x, Args... args);
+matrix_of_matrix_type jacobian(F h, vector_of_vector_type x, Args... args);
 
 template<typename T>
 bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n);

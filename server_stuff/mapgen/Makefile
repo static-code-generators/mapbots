@@ -2,7 +2,7 @@ IDIR=include
 
 
 CXX=g++
-CXXFLAGS=-std=c++11 -O3 -I. -I$(IDIR)
+CXXFLAGS=-std=c++11 -O3 -stdlib=libstdc++ -I. -I$(IDIR)
 
 BUILDDIR=build
 

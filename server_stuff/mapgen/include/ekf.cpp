@@ -34,7 +34,7 @@ bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n)
 }
 
 template <typename F, typename... Args>
-matrix_of_matrix_type jacobian(F h, ublas::vector< ublas::vector<double> > x, Args... args)
+matrix_of_matrix_type jacobian(F h, vector_of_vector_type x, Args... args)
 {
     vector_of_vector_type y = h(x, args...);
     unsigned n = x.size(), m = y.size();
