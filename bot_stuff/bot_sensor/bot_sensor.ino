@@ -1,5 +1,5 @@
 /* 
-Emulating 24 sensors using 8 sensors by rotating
+Emulating 24 sensors using 4 sensors by rotating
 them about a servo motor.
 */
 
@@ -10,33 +10,35 @@ them about a servo motor.
 
 Servo myservo;
 
-float distMatrix[3][8];
-byte sensorMatrix[3];
+float distMatrix[24/numSens][numSens];
 
 void setup()
 {
     Serial.begin(9600);
-    pinMode(clockPin, OUTPUT);
-    pinMode(latchPin, OUTPUT);
-    pinMode(dataPin, OUTPUT);
+    int i;
+    for(i = 0; i < numSens; i++)
+        pinMode(triggerArr[i], OUTPUT);
     pinMode(echoPin, INPUT);
     myservo.attach(servoPin);
 }
 
 void loop()
 {
-    myservo.write(0);
-    delay(500);
-    takeReading(1);
-    delay(500);
-    myservo.write(15);
-    delay(500);
-    takeReading(2);
-    delay(500);
-    myservo.write(135);
-    delay(500);
-    takeReading(0);
-    delay(500);
+    takeMultipleReadings();
+}
+
+void takeMultipleReadings()
+{
+    int i;
+    int servoAngle = 0;
+    for(i = 0; i < 6; i++)
+    {
+        myservo.write(servoAngle);
+        delay(500);
+        takeReading(i);
+        delay(500);
+        servoAngle += 15;
+    }
 }
 
 void takeReading(int row)
@@ -45,18 +47,7 @@ void takeReading(int row)
     for(i = 0; i < numSens; i++)
         distMatrix[row][i] = 0.0;
 
-    sensorMatrix[row] = 0;
-    scan(distMatrix[row], sensorMatrix[row]); // scan(float distCm[], byte sensors)
+    scan(distMatrix[row]); // scan(float distCm[])
 
-    for(i = 0; i < numSens; i++)
-    {
-        Serial.print(row);
-        Serial.print(":\n");
-        Serial.print(i);
-        Serial.print(": ");
-        Serial.print(distMatrix[row][i]);
-        Serial.print("cm  ");
-    }
-    Serial.print("\n");
     delay(1000);
 }

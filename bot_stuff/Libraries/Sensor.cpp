@@ -1,40 +1,30 @@
 #include "Constants.h"
 #include "Sensor.h"
 
-// Code for using multiple sensors (upto 8)
+float singleSensorReading(int sensor);
 
-
-void triggerShiftRegisterAt(int i, byte sensors);
-
-void scan(float distCm[], byte sensors)
+void scan(float distCm[])
 {
-    sensors = 0;
-
-    // resetting all triggers on 8 sensors to 0
-    digitalWrite(latchPin, LOW);
-    shiftOut(dataPin, clockPin, LSBFIRST, sensors);
-    digitalWrite(latchPin, HIGH);
-
     int i;
     for(i = 0; i < numSens; i++)
     {
-        triggerShiftRegisterAt(i, sensors); 
-        // converts time taken to receive pulse (in microseconds) to centimeters
-        distCm[i] = (pulseIn(echoPin, HIGH, 25000))/2.0/29.1;
+        distCm[i] = singleSensorReading(i);
+        delay(500);
     }
 }
 
-void triggerShiftRegisterAt(int i, byte sensors)
+float singleSensorReading(int sensor)
 {
-    bitSet(sensors, i); // sets ith bit to 1 in byte 'sensors'
-    digitalWrite(latchPin, LOW);
-    shiftOut(dataPin, clockPin, LSBFIRST, sensors);
-    digitalWrite(latchPin, HIGH);
-
+    for (int i = 0; i < 3; ++i) {
+        digitalWrite(s[i], (sensor >> i) & 1);
+        //Serial.print((sensor >> i) & 1);
+        //delay(10);
+    }
+    
+    //Serial.print(", ");
+    delay(10);
+    digitalWrite(triggerPin, HIGH);
     delayMicroseconds(10);
-
-    bitClear(sensors, i); // clears ith bit to 0 in byte 'sensors'
-    digitalWrite(latchPin, LOW);
-    shiftOut(dataPin, clockPin, LSBFIRST, sensors);
-    digitalWrite(latchPin, HIGH);
+    digitalWrite(triggerPin, LOW);
+    return pulseIn(echoPin, HIGH, 25000) / 2.0 / 29.1;
 }

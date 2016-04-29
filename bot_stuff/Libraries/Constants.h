@@ -19,9 +19,9 @@ const int encL = 6;
 const int encR = 7;
 
 //For wheel and encoder dimensions
-const double circ = 157.07963267948965;
-const int numSlits = 30;
-const double distPerPulse = circ / numSlits;
+const double circ = 157.07963267948965; //circumferance of wheel in mm
+const int numSlits = 30; //number of slits in the wheel encoder
+const double distPerPulse = circ / numSlits; //what is the meaning of life? we do not know
 const int numSens = 8; // number of sensors used
 
 /* 
@@ -34,10 +34,13 @@ Pin 8 and 13 - GND
 Pin 10 and 16 - 5V
 Echo pins are connected to Pin 8, each through a transistor
 */
-const int clockPin = 12;
-const int latchPin = 11;
-const int dataPin = 10;
-const int echoPin = 8;
+//const int clockPin = 12;
+//const int latchPin = 11;
+//const int dataPin = 10;
+
+const int triggerPin = 8;
+const int echoPin = 10;
+const int s[3] = {11, 12, 13};
 const int servoPin = 9;
 
 #endif
