@@ -1,0 +1,29 @@
+\documentclass[12pt]{article}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\begin{document}
+
+the equation for the first line is
+
+$$y - y_{1} - \left(x - x_{1}\right) \tan{\left (\alpha + \theta \right )} = 0$$
+
+the equation for the second line is
+
+$$- r + x \cos{\left (\beta \right )} + y \sin{\left (\beta \right )} = 0$$
+
+minimising theta and the corresponding values of x and y are
+$$\theta = - \alpha - \operatorname{atan}{\left (\frac{1}{\tan{\left (\beta \right )}} \right )}$$
+
+$$x = \frac{r - \frac{x_{1} \sin{\left (\beta \right )}}{\tan{\left (\beta \right )}} - y_{1} \sin{\left (\beta \right )}}{- \frac{\sin{\left (\beta \right )}}{\tan{\left (\beta \right )}} + \cos{\left (\beta \right )}}$$
+
+$$y = \frac{y_{1} \cos{\left (\beta \right )} - \frac{r - x_{1} \cos{\left (\beta \right )}}{\tan{\left (\beta \right )}}}{- \frac{\sin{\left (\beta \right )}}{\tan{\left (\beta \right )}} + \cos{\left (\beta \right )}}$$
+
+$$\theta = - \alpha + \operatorname{atan}{\left (\tan{\left (\beta \right )} \right )}$$
+
+$$x = \frac{r + x_{1} \sin{\left (\beta \right )} \tan{\left (\beta \right )} - y_{1} \sin{\left (\beta \right )}}{\sin{\left (\beta \right )} \tan{\left (\beta \right )} + \cos{\left (\beta \right )}}$$
+
+$$y = \frac{y_{1} \cos{\left (\beta \right )} + \left(r - x_{1} \cos{\left (\beta \right )}\right) \tan{\left (\beta \right )}}{\sin{\left (\beta \right )} \tan{\left (\beta \right )} + \cos{\left (\beta \right )}}$$
+
+\end{document}
