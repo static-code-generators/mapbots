@@ -4,6 +4,12 @@
 
 vector_of_vector_type distanceEstimator(vector_of_vector_type x);
 
+template<typename T>
+T square(T x)
+{
+    return x * x;
+}
+
 int main()
 {
 
@@ -34,14 +40,40 @@ vector_of_vector_type distanceEstimator(vector_of_vector_type x)
     const int numSensors = 24;
     vector_of_vector_type z(numSensors, vector_type(1, 0));
 
-    double currX = botPos[0], currY = botPos[1], currAngle = botPos[2];
+    double x1 = botPos[0], y1 = botPos[1], alpha = botPos[2];
     for (int i = 0; i < numSensors; ++i) {
+        double readingEstimate = 0;
         //note that j iterates from 1 to x.size() - 1
         //since the position of the bot is stored in the x[0]
+        //for now, we assume only line features
         for (int j = 1; j < x.size(); ++j) {
-            //fill in code to find the distance of feature j from
-            //sensors i
+            
+            //enter parameters of feature
+            double r = x[j][0], beta = x[j][1];
+
+            //minima for distance
+            double theta = -alpha + beta;
+            //corresponding value of x
+            //note that this is slightly different from the docs, you can get
+            //here by multiplying and dividing the expression there by cos(beta)
+            double x = r * cos(beta) + x1 * square(sin(beta)) - y1 * sin(beta) * cos(beta);
+            //corresponding value of y
+            //again, slightly different from the docs, you can get here
+            //by same as above.
+            double y = r * sin(beta) + y1 * square(cos(beta)) - x1 * sin(beta) * cos(beta);
+            
+            //TODO: figure out how to mark out line-segments using point features
+            //TODO: add check on x and y, see if they lie on the feature
+            //(ie. on the line segment rather than the line)
+
+            if (std::abs(theta) <= M_PI / 12){
+                double d = sqrt(square(x - x1) + square(y - y1));
+                if (readingEstimate == 0 || d < readingEstimate)
+                    readingEstimate = d;
+            }
         }
+        //this is because z is a vector of 1-vectors
+        z[i][0] = readingEstimate;
     }
 
     return z;
