@@ -52,7 +52,7 @@ vector_of_vector_type distanceEstimator(vector_of_vector_type x)
             double r = x[j][0], beta = x[j][1];
 
             //minima for distance
-            double theta = -alpha + beta;
+            double theta = -alpha + atan(tan(beta));
             //corresponding value of x
             //note that this is slightly different from the docs, you can get
             //here by multiplying and dividing the expression there by cos(beta)
