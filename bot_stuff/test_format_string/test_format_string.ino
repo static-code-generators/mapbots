@@ -1,6 +1,7 @@
 #include "Sensor.h"
 #include "Direction.h"
 #include "Constants.h"
+#include <Servo.h>
 
 enum direction
 {
@@ -11,12 +12,19 @@ enum direction
 };
 
 int rightAngleDelay = 800;
+Servo myservo;
 
 int xPos = 0;
 int yPos = 0;
 direction currDir = NORTH;
 
 float distMatrix[3][8];
+
+void turnServoAngle(int stopAngle);
+void takeMultipleReadings();
+void takeReading(int row);
+void sendReadings();
+void turnLeft();
 
 void setup()
 {
@@ -40,8 +48,7 @@ void loop()
     takeMultipleReadings();
     sendReadings();
     turnLeft();
-    currDir = (currDir + 1) % 4;
-
+    currDir = (direction)(((int)currDir + 1) % 4);
 }
 
 void takeMultipleReadings()
@@ -50,7 +57,7 @@ void takeMultipleReadings()
     int servoAngle = 0;
     for(i = 0; i < 3; i++)
     {
-        myservo.write(servoAngle);
+        turnServoAngle(servoAngle);
         delay(500);
         takeReading(i);
         delay(500);
@@ -64,7 +71,7 @@ void takeReading(int row)
     for(i = 0; i < numSens; i++)
         distMatrix[row][i] = 0.0;
 
-    scan(distMatrix[row]); // scan(float distCm[])
+    scanAll(distMatrix[row]); // scan(float distCm[])
 
     delay(1000);
 }
@@ -76,12 +83,12 @@ void sendReadings()
     // sensor theta: in degrees
 
     // Printing x-y coords
-    Serial.print("x: ");
-    Serial.print(xPos);
-    Serial.print(" ");
-    Serial.print("y: ");
-    Serial.println(yPos);
 
+    //id : 42
+    // distance - float
+    // x - float
+    // y - float
+    // theta - float
     // Now printing sensor theta along with sensor data
     // all angles in radians now
     // be careful, the code above talks in degrees at times
@@ -92,14 +99,19 @@ void sendReadings()
 
     for(i = 0; i < numSens; i++) {
         for(j = 0; j < 3; j++) {
-            Serial.print("theta: ");
-            Serial.print(sensorTheta + shiftTheta);
+            Serial.print(42);
             Serial.print(" ");
-            Serial.println(distMatrix[i][j]);
+            Serial.print(distMatrix[i][j]);
+            Serial.print(" ");
+            Serial.print(xPos);
+            Serial.print(" ");
+            Serial.print(yPos);
+            Serial.print(" ");
+            Serial.println(sensorTheta + shiftTheta);
             sensorTheta += 15 * (180.0 / M_PI); 
         }
     }
-    Serial.println("readings for this batch complete, madafaka");
+//    Serial.println("readings for this batch complete, madafaka");
 }
 
 void turnLeft()
@@ -107,4 +119,13 @@ void turnLeft()
     moveLeft();
     delay(rightAngleDelay);    
     stahp();
+}
+
+void turnServoAngle(int stopAngle)
+{
+    for(int pos = stopAngle - 15; pos <= stopAngle; pos++)
+    {
+        myservo.write(pos);
+        delay(15);
+    }
 }
