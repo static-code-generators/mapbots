@@ -22,12 +22,8 @@ std::vector<payload> readCSV(char *filename)
     CSVRow row;
     payload p;
     std::vector<payload> readings;
-    while (fin)
+    while (fin >> row)
     {
-        fin >> row;
-        if (!fin) {
-            break;
-        }
         assert(row.size() == 5);
         p = {.bot_id = stoi(row[0]),
              .reading = stof(row[1]),
