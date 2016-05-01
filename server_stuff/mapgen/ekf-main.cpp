@@ -7,7 +7,7 @@ typedef ublas::identity_matrix<double> identity_matrix;
 typedef ublas::zero_matrix<double> zero_matrix;
 
 vector_of_vector_type distanceEstimator(vector_of_vector_type x);
-vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> z_actual);
+vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> zActual, std::vector<vector_type> motion);
 
 vector_type composition(vector_type xB, vector_type xC);
 matrix_type compositionJacobian1(vector_type xB, vector_type xC);
@@ -24,8 +24,12 @@ int main()
 
 }
 
-vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> zActual)
+vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> zActual, std::vector<vector_type> motion)
 {
+    //the first argument is the vector we are trying to predict
+    //the second argument is the series of measurements of the ultrasonic sensors
+    //the third argument is the series of motions the bot makes (from the wheel encoder)
+
     //here we implement the extended kalman filter.
     //(insert attribution to original paper here)
 
