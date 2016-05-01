@@ -1,8 +1,10 @@
 #include "ekf.hpp"
 #include <iomanip>
 #include <cmath>
+#include <vector>
 
 vector_of_vector_type distanceEstimator(vector_of_vector_type x);
+vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> z_actual);
 
 template<typename T>
 T square(T x)
@@ -13,6 +15,24 @@ T square(T x)
 int main()
 {
 
+}
+
+vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> z_actual)
+{
+    //here we implement the extended kalman filter.
+    //(insert attribution to original paper here)
+
+    int m = x.size(); //number of features + 1(position of bot)
+
+    //covariance matrix:
+    //possible optimisation -> use ublas::sparse_matrix instead, since
+    //a lot of the entries here are 0.
+    matrix_of_matrix_type P(m, m);
+    //we are certain of the bot's original position (since it is the base reference)
+    P(0, 0) = ublas::zero_matrix<double>(3, 3);
+    //we are very uncertain of the feature's locations
+    for (int i = 1; i < m; ++i)
+        P(i, i) = matrix_type(2, 2, 42696942.1);
 }
 
 vector_of_vector_type distanceEstimator(vector_of_vector_type x)
