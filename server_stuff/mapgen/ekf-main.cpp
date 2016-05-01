@@ -6,6 +6,10 @@
 vector_of_vector_type distanceEstimator(vector_of_vector_type x);
 vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> z_actual);
 
+vector_type composition(vector_type xB, vector_type xC);
+matrix_type compositionJacobian1(vector_type xB, vector_type xC);
+matrix_type compositionJacobian2(vector_type xB, vector_type xC);
+
 template<typename T>
 T square(T x)
 {
@@ -97,4 +101,98 @@ vector_of_vector_type distanceEstimator(vector_of_vector_type x)
     }
 
     return z;
+}
+
+vector_type composition(vector_type xB, vector_type xC)
+{
+    //the composition transformation.
+    //look at the appendix of the paper for more details
+    //takes xB with respect to some xA, 
+    //xC with respect to xB
+    //return xC with respect to xA.
+
+    //xB and xC must be the same size
+    assert(xB.size() == xC.size());
+    //xB and xC must each have three values:
+    //(x, y, theta) [theta -> orientation (in radians)]
+    assert(xB.size() == 3);
+
+    double x1 = xB(0), y1 = xB(1), theta1 = xB(2);
+    double x2 = xC(0), y2 = xC(1), theta2 = xC(2);
+
+    //we do not derive these formulae here, but trust me,
+    //they are correct. (refer to the back of the paper if you don't)
+    double x3 = x1 + x2 * cos(theta1) - y2 * sin(theta1);
+    double y3 = y1 + x2 * sin(theta1) + y2 * cos(theta1);
+    double theta3 = theta1 + theta2;
+    //TODO: decide a range for angles, and make sure this addition
+    //gets theta3 in the correct range. 
+
+    //denotes xC with respect to A
+    vector_type xCA(3);
+    
+    xCA(0) = x3;
+    xCA(1) = y3;
+    xCA(2) = theta3;
+
+    return xCA;
+}
+
+matrix_type compositionJacobian1(vector_type xB, vector_type xC)
+{
+   //returns the jacobian of the composition operator
+   //with respect to xB
+
+    //xB and xC must be the same size
+    assert(xB.size() == xC.size());
+    //xB and xC must each have three values:
+    //(x, y, theta) [theta -> orientation (in radians)]
+    assert(xB.size() == 3);
+
+    double x1 = xB(0), y1 = xB(1), theta1 = xB(2);
+    double x2 = xC(0), y2 = xC(1), theta2 = xC(2);
+
+    matrix_type J(3, 3, 0);
+
+    //refer to the appendix for these formulae.
+    J(0, 0) = 1;
+    J(1, 1) = 1;
+    J(2, 2) = 1;
+    J(0, 2) = -x2 * sin(theta1) - y2 * cos(theta1);
+    J(1, 2) = x2 * cos(theta1) - y2 * sin(theta1);
+    //the rest of the entries remain 0, woo.
+    //wow, someone is actually reading this,
+    //"Person, I am not your father" - Parth
+
+    return J;
+}
+
+matrix_type compositionJacobian2(vector_type xB, vector_type xC)
+{
+   //returns the jacobian of the composition operator
+   //with respect to xC
+
+    //xB and xC must be the same size
+    assert(xB.size() == xC.size());
+    //xB and xC must each have three values:
+    //(x, y, theta) [theta -> orientation (in radians)]
+    assert(xB.size() == 3);
+
+    double x1 = xB(0), y1 = xB(1), theta1 = xB(2);
+    double x2 = xC(0), y2 = xC(1), theta2 = xC(2);
+
+    matrix_type J(3, 3, 0);
+
+    //refer to the appendix for these formulae.
+    //note that they don't derive them either, but we did
+    //before writing them here (yes we did)
+    J(0, 0) = cos(theta1);
+    J(0, 1) = -sin(theta1);
+    J(1, 0) = sin(theta1);
+    J(1, 1) = cos(theta1);
+    J(2, 2) = 1;
+    //the rest of the entries are 0.
+    //and seriously, we did derive these.
+
+    return J;
 }
