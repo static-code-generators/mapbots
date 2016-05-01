@@ -24,7 +24,7 @@ int main()
 
 }
 
-vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> z_actual)
+vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> zActual)
 {
     //here we implement the extended kalman filter.
     //(insert attribution to original paper here)
@@ -59,9 +59,12 @@ vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vect
     //on-diagonal entries become identity
     //off-diagonal entries become 0 matrix
     //TODO: tune using actual readings and adventures.
+    //note that this is essentially the variance of the 
+    //odometer's error.
 
     //covariance of white noise
     //in sensor measurements
+    //why is all the noise white? because we are racist.
     //we know that number of sensors is 24.
     //(it's actually 8, we're simulating 24 by using a servo,
     //but shoo)
@@ -71,6 +74,8 @@ vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vect
     //is actually a matrix of scalars. 
     //but because the other matrices are assholes, R has to be an asshole
     //too. hence, R is a matrix of 1x1 matrices :'(
+    //TODO: find variance of sensors by experiment, and change R to have those.
+    //R is actually just the variance of the error of the ultrasonic sensors.
     for (int i = 0; i < s; ++i)
         for (int j = 0; j < s; ++j)
             if (i == j)
@@ -80,6 +85,11 @@ vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vect
 
     //after all of this nonsense, we are finally ready to start
     //executing the filter.
+
+    int k = zActual.size();
+    for (int i = 0; i < k; ++i) {
+
+    }
 }
 
 vector_of_vector_type distanceEstimator(vector_of_vector_type x)
