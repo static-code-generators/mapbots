@@ -90,9 +90,35 @@ vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vect
     //after all of this nonsense, we are finally ready to start
     //executing the filter.
 
+    //psyche!
+    //there is actually some more nonsense
+
+    //the people in the paper have added the wrong dimensions for G
+    //maybe they were high.
+    //unless I have the wrong dimensions for Q.
+    //(which is possible) TODO: check if I messed up.
+    //these matrices are used in the predict step.
+    matrix_of_matrix_type F(m, m), G(m, m);
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < m; ++j) {
+            G(i, j) = F(i, j) = zero_matrix(x[i].size(), x[j].size());
+            if (i == j)
+                F(i, j) = identity_matrix(x[i].size(), x[i].size());
+        }
+    //why do we have these specific values for G(i, j) and F(i, j)?
+    //this is a difficult question we choose not to answer.
+
+    //the lies are over, this is the filter, I swear.
     int k = zActual.size();
     for (int i = 0; i < k; ++i) {
+        F(0, 0) = compositionJacobian1(x[0], motion[i]);
+        G(0, 0) = compositionJacobian2(x[0], motion[i]);
+        x[0] = composition(x[0], motion[i]);
 
+        //I hope this works. If anything breaks, check here first.
+        //the function prod_local is in include/ekf.{h,c}pp
+        P = prod_local(prod_local(F, P), ublas::trans(F));
+        P += prod_local(prod_local(G, Q), ublas::trans(G));
     }
 }
 
