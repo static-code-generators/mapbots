@@ -3,6 +3,9 @@
 #include <cmath>
 #include <vector>
 
+typedef ublas::identity_matrix<double> identity_matrix;
+typedef ublas::zero_matrix<double> zero_matrix;
+
 vector_of_vector_type distanceEstimator(vector_of_vector_type x);
 vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> z_actual);
 
@@ -28,15 +31,55 @@ vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vect
 
     int m = x.size(); //number of features + 1(position of bot)
 
+    //x[0] is bot position, hence a 3-vector.
+    assert(x[0].size() == 3);
+    //x[1 ... m - 1] are features, hence 2-vectors.
+    for (int i = 1; i < m; ++i)
+        assert(x[i].size() == 2);
+
     //covariance matrix:
     //possible optimisation -> use ublas::sparse_matrix instead, since
     //a lot of the entries here are 0.
     matrix_of_matrix_type P(m, m);
     //we are certain of the bot's original position (since it is the base reference)
-    P(0, 0) = ublas::zero_matrix<double>(3, 3);
+    P(0, 0) = zero_matrix(3, 3);
     //we are very uncertain of the feature's locations
     for (int i = 1; i < m; ++i)
         P(i, i) = matrix_type(2, 2, 42696942.1);
+    
+    //covariance of white noise
+    //in measurement of x
+    matrix_of_matrix_type Q(m, m);
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < m; ++j)
+            if (i == j)
+                Q(i, j) = identity_matrix(x[i].size());
+            else
+                Q(i, j) = zero_matrix(x[i].size(), x[j].size());
+    //on-diagonal entries become identity
+    //off-diagonal entries become 0 matrix
+    //TODO: tune using actual readings and adventures.
+
+    //covariance of white noise
+    //in sensor measurements
+    //we know that number of sensors is 24.
+    //(it's actually 8, we're simulating 24 by using a servo,
+    //but shoo)
+    int s = 24; //unhelpful variable name, sue me.
+    matrix_of_matrix_type R(s, s);
+    //R is a real MVP tbh, since it is the only matrix which 
+    //is actually a matrix of scalars. 
+    //but because the other matrices are assholes, R has to be an asshole
+    //too. hence, R is a matrix of 1x1 matrices :'(
+    for (int i = 0; i < s; ++i)
+        for (int j = 0; j < s; ++j)
+            if (i == j)
+                R(i, j) = identity_matrix(1);
+            else
+                R(i, j) = zero_matrix(1, 1);
+
+    //after all of this nonsense, we are finally ready to start
+    //executing the filter.
 }
 
 vector_of_vector_type distanceEstimator(vector_of_vector_type x)
