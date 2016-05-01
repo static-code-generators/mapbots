@@ -30,7 +30,8 @@ std::vector<payload> readCSV(char *filename)
              .loc = {.x = stof(row[2]),
                      .y = stof(row[3]),
                      .theta = stof(row[4])}};
-        readings.push_back(p);
+        if (p.reading != 0)
+            readings.push_back(p);
     }
     return readings;
 }
