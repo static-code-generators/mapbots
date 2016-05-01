@@ -9,7 +9,7 @@ void scanAll(float distCm[])
     for(i = 0; i < numSens; i++)
     {
         distCm[i] = singleSensorReading(i);
-        delay(500);
+        delay(100);
     }
 }
 
