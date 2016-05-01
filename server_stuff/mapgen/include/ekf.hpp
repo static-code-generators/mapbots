@@ -17,6 +17,8 @@ typedef ublas::vector<vector_type> vector_of_vector_type;
 
 matrix_of_matrix_type prod_local(matrix_of_matrix_type A, matrix_of_matrix_type B);
 
+matrix_type flatten(matrix_of_matrix_type A);
+
 template <typename F, typename... Args>
 /**
  * @brief computes the Jacobian of the function h evaluated at x
