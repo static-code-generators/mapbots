@@ -25,8 +25,8 @@ float takereading(int sensor)
     delayMicroseconds(10);
     digitalWrite(trig, LOW);
     return pulseIn(echo, HIGH, 25000) / 2.0 / 29.1;
-    
 }
+
 void loop() {
     int i;
     for (i=0; i<8; i++) {

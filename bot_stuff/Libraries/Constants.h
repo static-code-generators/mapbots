@@ -34,10 +34,13 @@ Pin 8 and 13 - GND
 Pin 10 and 16 - 5V
 Echo pins are connected to Pin 8, each through a transistor
 */
-const int clockPin = 12;
-const int latchPin = 11;
-const int dataPin = 10;
-const int echoPin = 8;
+//const int clockPin = 12;
+//const int latchPin = 11;
+//const int dataPin = 10;
+
+const int triggerPin = 8;
+const int echoPin = 10;
+const int s[3] = {11, 12, 13};
 const int servoPin = 9;
 
 #endif
