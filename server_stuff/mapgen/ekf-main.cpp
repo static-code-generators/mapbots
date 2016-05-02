@@ -198,6 +198,21 @@ vector_type distanceEstimator(const vector_type &x)
                 double d = sqrt(square(x - x1) + square(y - y1));
                 if (readingEstimate == 0 || d < readingEstimate)
                     readingEstimate = d;
+            } else {
+                double den = sin(beta) * tan(alpha + M_PI / 12) + cos(beta);
+                x = (r - x1 * sin(beta) * tan(alpha + M_PI / 12) - y1 * sin(beta)) / den;
+                y = (y1 * cos(beta) + (r - x1 * cos(beta)) * tan(alpha + M_PI / 12)) / den;
+                double d = sqrt(square(x - x1) + square(y - y1));
+                if (readingEstimate == 0 || d < readingEstimate)
+                    readingEstimate = d;
+
+                den = -sin(beta) * cot(alpha + M_PI * 5/12)  + cos(beta);
+                x = (r - x1 * sin(beta) * cot(alpha + M_PI * 5/12) - y1 * sin(beta)) / den;
+                y = (y1 * cos(beta) - (r - x1 * cos(beta)) * cot(alpha + M_PI * 5/12)) / den;
+
+                d = sqrt(square(x - x1) + square(y - y1));
+                if (readingEstimate == 0 || d < readingEstimate)
+                    readingEstimate = 0;
             }
         }
         z(i) = readingEstimate;

@@ -27,3 +27,8 @@ matrix_type flatten(matrix_of_matrix_type A)
 
     return flatA;
 }
+
+double cot(double x)
+{
+    return cos(x) / sin(x);
+}

@@ -31,4 +31,6 @@ bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n);
 template<class T>
 bool invertMatrix(const ublas::matrix<T>& input, ublas::matrix<T>& inverse);
 
+double cot(double x);
+
 #include "ekf.tpp"
