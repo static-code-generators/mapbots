@@ -7,12 +7,6 @@
 #define M_PI 3.14159265358979323846
 // Final Arduino code for mapbot
 
-/*
-TODO:
-* Add angle of 24 sensors wrt origin
-* Add final takeMultipleReadings() function to Sensor.h header
-*/
-
 enum direction
 {
     NORTH = 0,
@@ -65,9 +59,9 @@ void setup()
     pinMode(BR, OUTPUT);
     pinMode(encL, INPUT);
     pinMode(encR, INPUT);
-    pinMode(clockPin, OUTPUT);
-    pinMode(latchPin, OUTPUT);
-    pinMode(dataPin, OUTPUT);
+    for(int i = 0; i < 3; i++)
+        pinMode(s[i], OUTPUT);
+    pinMode(triggerPin, OUTPUT);
     pinMode(echoPin, INPUT);
     myservo.attach(servoPin);
 
@@ -162,4 +156,29 @@ void turnLeft()
     moveLeft();
     delay(rightAngleDelay);    
     stahp();
+}
+
+void takeMultipleReadings()
+{
+    int i;
+    int servoAngle = 0;
+    for(i = 0; i < 3; i++)
+    {
+        myservo.write(servoAngle);
+        delay(500);
+        takeReading(i);
+        delay(500);
+        servoAngle += 15;
+    }
+}
+
+void takeReading(int row)
+{
+    int i;
+    for(i = 0; i < numSens; i++)
+        distMatrix[row][i] = 0.0;
+
+    scanAll(distMatrix[row]); // scanAll(float distCm[])
+
+    delay(1000);
 }
