@@ -90,34 +90,34 @@ void doHough(std::vector<payload> readings, int lineThresh, int pointThresh)
      *
      * beta: Angular error of ultrasonic sensor, -15deg < beta < 15deg
      */
-//    maxVal[X] = 15000.0F; // in millimetres
-//    maxVal[Y] = 15000.0F; // in millimetres
-//    minVal[X] = -15000.0F;
-//    minVal[Y] = -15000.0F;
-//    res[X] = 10;
-//    res[Y] = 10;
-//
-//    houghSpace pointspace (res, maxVal, minVal);
-//
-//    for (auto &p: readings) {
-//        for (float beta = -M_PI/12; beta <= M_PI/12; beta += M_PI/180) {
-//            vote[X] = p.loc.x + (p.reading * cosf(p.loc.theta + beta));
-//            vote[Y] = p.loc.y + (p.reading * sinf(p.loc.theta + beta));
-//            assert(vote[X] <= maxVal[X]);
-//            assert(vote[Y] <= maxVal[Y]);
-//            PPRINT(vote[X]);
-//            PPRINT(vote[Y]);
-//            pointspace.addVote(vote);
-//        }
-//    }
-//    std::vector< std::vector<float> > pointF (pointspace.getMaxima(pointThresh));
-//    std::ofstream pout ("points.txt");
-//    for (auto &p: pointF) {
-//        for (auto &q: p) {
-//            pout << q << " ";
-//        }
-//        pout << std::endl;
-//    }
+    maxVal[X] = 15000.0F; // in millimetres
+    maxVal[Y] = 15000.0F; // in millimetres
+    minVal[X] = -15000.0F;
+    minVal[Y] = -15000.0F;
+    res[X] = 10;
+    res[Y] = 10;
+
+    houghSpace pointspace (res, maxVal, minVal);
+
+    for (auto &p: readings) {
+        for (float beta = -M_PI/12; beta <= M_PI/12; beta += M_PI/180) {
+            vote[X] = p.loc.x + (p.reading * cosf(p.loc.theta + beta));
+            vote[Y] = p.loc.y + (p.reading * sinf(p.loc.theta + beta));
+            assert(vote[X] <= maxVal[X]);
+            assert(vote[Y] <= maxVal[Y]);
+            PPRINT(vote[X]);
+            PPRINT(vote[Y]);
+            pointspace.addVote(vote);
+        }
+    }
+    std::vector< std::vector<float> > pointF (pointspace.getMaxima(pointThresh));
+    std::ofstream pout ("points.txt");
+    for (auto &p: pointF) {
+        for (auto &q: p) {
+            pout << q << " ";
+        }
+        pout << std::endl;
+    }
   //std::cout << pointspace;
 }
 
