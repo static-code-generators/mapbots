@@ -18,7 +18,7 @@ enum direction
 // all distances are in millimeters, unless otherwise specified
 // so are your mother's boobs
 // constant values
-const float obstacleAvoidDist = 100; // maximum distance of obstacle at which bot should avoid obstacle
+const float obstacleAvoidDist = 400; // maximum distance of obstacle at which bot should avoid obstacle
 const int rightAngleDelay = 650; // delay in milliseconds required for bot to turn 90 degrees
 
 // global variables for usage across functions
@@ -39,7 +39,7 @@ float xPos = 0;
 float yPos = 0;
 
 float straightLineDist = 0;
-float unitDist = 50;
+float unitDist = 100;
 
 Servo myservo;
 
@@ -72,10 +72,13 @@ void setup()
 
 void loop()
 {
+    //Serial.print("Current front sensor reading: ");
+    //Serial.println(distMatrix[0][1]);
     while (obstacleFound == 1 || straightLineDist > 2048.0) {
         turnLeft();
         currDir = (direction)(((int)currDir + 1) % 4);
         takeMultipleReadings();
+        myservo.write(0);
         sendReadings();
         obstacleFound = (distMatrix[0][1] != 0) && (distMatrix[0][1] < obstacleAvoidDist);
         straightLineDist = 0;
@@ -85,8 +88,10 @@ void loop()
     updatePos(unitDist);
     straightLineDist += unitDist;
     takeMultipleReadings();
+    myservo.write(0);
+    obstacleFound = (distMatrix[0][1] != 0) && (distMatrix[0][1] < obstacleAvoidDist);
     sendReadings();
-    delay(1000);
+    delay(500);
 }
 
 void updatePos(float distanceTravelled)
@@ -150,17 +155,17 @@ void sendReadings()
     float shiftTheta = shiftOfDir[currDir];
 
     // Debugging again
-//    Serial.println("Entire matrix of readings:");
-//    for(i = 0; i < 3; i++)
-//    {
-//        for(j = 0; j < numSens; j++)
-//        {
-//            Serial.print(distMatrix[i][j]);
-//            Serial.print(" ");    
-//        }
-//        Serial.print("\n");
-//    }
-//    Serial.println("Matrix done");
+    //Serial.println("Entire matrix of readings:");
+    //for(i = 0; i < 3; i++)
+    //{
+    //    for(j = 0; j < numSens; j++)
+    //    {
+    //        Serial.print(distMatrix[i][j]);
+    //        Serial.print(" ");    
+    //    }
+    //    Serial.print("\n");
+    //}
+    //Serial.println("Matrix done");
     // debugging done
     
     // outer for-loop iterates as 1, 0, 7, 6, 5... 2 due to orientation of sensors; we want to go counter-clockwise
@@ -177,6 +182,8 @@ void sendReadings()
             Serial.print(yPos);
             Serial.print(",");
             Serial.print(fmod(sensorTheta + shiftTheta, 2 * M_PI));
+            Serial.print(",");
+            Serial.print(i);
             Serial.print("\n");
             sensorTheta += 15 * (180.0 / M_PI); 
         }
