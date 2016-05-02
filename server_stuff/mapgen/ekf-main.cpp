@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include "CSVRow.h"
 
 typedef ublas::identity_matrix<double> identity_matrix;
 typedef ublas::zero_matrix<double> zero_matrix;
@@ -19,9 +20,35 @@ T square(T x)
     return x * x;
 }
 
-int main()
+std::vector<payload> readCSV(char *filename)
 {
+    std::ifstream fin (filename);
+    CSVRow row;
+    payload p;
+    std::vector<payload> readings;
+    while (fin >> row)
+    {
+        // No bot_id anymore
+        assert(row.size() >= 4);
+        p = {.reading = stof(row[0]),
+             .loc = {.x = stof(row[1]),
+                     .y = stof(row[2]),
+                     .theta = stof(row[3])}};
+        readings.push_back(p);
+    }
+    return readings;
+}
 
+int main(int argc, char **argv)
+{
+    assert(argc == 1);
+    std::vector<payload> readings = readCSV(argv[1]);
+
+    vector_type x;
+    std::vector<vector_type> z;
+    std::vector<vector_type> motion;
+    for (auto &p: readings) {
+    }
 }
 
 vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<vector_type> motion)
