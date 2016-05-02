@@ -27,9 +27,11 @@ int obstacleFound = 0; // flag for checking whether obstacle was found in path o
 
 /*
 * contains readings from sensors, the angles wrt. present orientation look like
-* A = {{0, 45, 90, 135, 180, 225, 270, 315},
-* {15, 60, 105, 150, 195, 240, 285, 330},
-* {30, 75, 120, 165, 210, 255, 300, 345}}
+* A = {
+* {45, 0, 315, 270, 225, 180, 135, 90},
+* {60, 15, 330, 285, 240, 195, 150, 105},
+* {75, 30, 345, 300, 255, 210, 165, 120}
+* }
 * so distMatrix[i][j] = distance at angle(A[i][j])
 */
 float distMatrix[3][8];
@@ -52,6 +54,7 @@ void updatePos(float distanceTravelled);
 void takeMultipleReadings();
 void takeReading(int row);
 void sendReadings();
+int obstacleHaiKya();
 
 void setup()
 {
@@ -74,13 +77,13 @@ void loop()
 {
     //Serial.print("Current front sensor reading: ");
     //Serial.println(distMatrix[0][1]);
-    while (obstacleFound == 1 || straightLineDist > 2048.0) {
+    while (obstacleFound == 1 || straightLineDist > 512.0) {
         turnLeft();
         currDir = (direction)(((int)currDir + 1) % 4);
         takeMultipleReadings();
         myservo.write(0);
         sendReadings();
-        obstacleFound = (distMatrix[0][1] != 0) && (distMatrix[0][1] < obstacleAvoidDist);
+        obstacleFound = obstacleHaiKya();
         straightLineDist = 0;
     }
 
@@ -92,6 +95,19 @@ void loop()
     obstacleFound = (distMatrix[0][1] != 0) && (distMatrix[0][1] < obstacleAvoidDist);
     sendReadings();
     delay(500);
+}
+
+int obstacleHaiKya()
+{
+    const int size = 3;
+    float readings[] = {distMatrix[0][1], distMatrix[1][1], distMatrix[2][2]};
+    float minimum = 10000;
+    for (int i=0; i<size; i++) {
+        if (readings[i] != 0 && readings[i] < minimum) {
+            minimum = readings[i];
+        }
+    }
+    return (minimum != 0 && minimum < obstacleAvoidDist);
 }
 
 void updatePos(float distanceTravelled)
