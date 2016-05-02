@@ -27,11 +27,14 @@ void loop()
     while(!Serial.available());
     resp = Serial.read();
     if(resp == '2')
-        upper = mid;
+        upper = mid - 1;
     else if(resp == '1')
-        lower = mid;
+        lower = mid + 1;
     else if(resp == '0')
         Serial.println(mid); 
+    Serial.println(lower);
+    Serial.println(mid);
+    Serial.println(upper);
 }
 
 void turnLeft(int currDelay)
