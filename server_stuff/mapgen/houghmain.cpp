@@ -36,7 +36,7 @@ std::vector<payload> readCSV(char *filename)
     return readings;
 }
 
-void addVotes(std::vector<payload> readings)
+void addVotes(std::vector<payload> readings, int lineThresh, int pointThresh)
 {
     std::vector<float> maxVal(2), res(2);
     std::vector<float> vote(2);
@@ -74,6 +74,15 @@ void addVotes(std::vector<payload> readings)
             linespace.addVote(vote);
         }
     }
+    std::vector< std::vector<float> > lineF (linespace.getMaxima(lineThresh));
+    ofstream fout ("points.txt");
+    for (auto &p: lineF) {
+        for (auto &q: p) {
+            fout << q << " ";
+        }
+        fout << std::endl;
+    }
+    fout.close();
     //std::cout << linespace;
     /**
      * POINT SPACE
@@ -100,20 +109,25 @@ void addVotes(std::vector<payload> readings)
             pointspace.addVote(vote);
         }
     }
+    std::vector< std::vector<float> > pointF (linespace.getMaxima(pointThresh));
+    fout.open("points.txt");
+    for (auto &p: pointF) {
+        for (auto &q: p) {
+            fout << q << " ";
+        }
+        fout << std::endl;
+    }
+    fout.close();
     //std::cout << pointspace;
 }
 
+/* argv: binname file.csv l-threshold p-threshold */
 int main(int argc, char **argv)
 {
-    assert(argc >= 2);
+    assert(argc == 4);
     std::vector<payload> readings = readCSV(argv[1]);
-    for (auto &p: readings) {
-        std::cout << p.bot_id << " "
-                  << p.reading << " "
-                  << p.loc.x << " "
-                  << p.loc.y << " "
-                  << p.loc.theta << " " << std::endl;
-    }
-    addVotes(readings);
+    int lineThresh = atoi(argv[2]);
+    int pointThresh = atoi(argv[3]);
+    doHough(readings, lineThresh, pointThresh);
     return 0;
 }
