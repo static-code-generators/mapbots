@@ -1,10 +1,17 @@
 import serial
 
-serial.Serial("/dev/tty.HC-05-DevB", 9600);
+ser = serial.Serial("/dev/tty.HC-05-DevB", 9600)
+ser.close()
+ser.open()
 outfile = open("data.csv", "wb+")
 
-with open("data.csv", "wb+") as outfile:
+try:
     while True:
         line = ser.readline()
-        outfile.writeline(line)
+        outfile.write(line)
         print(line)
+except KeyboardInterrupt:
+    print "kaise madarchod ho tum"
+    print "rukta hai hum"
+    ser.close()
+    outfile.close();
