@@ -24,12 +24,12 @@ std::vector<payload> readCSV(char *filename)
     std::vector<payload> readings;
     while (fin >> row)
     {
-        assert(row.size() == 5);
-        p = {.bot_id = stoi(row[0]),
-             .reading = stof(row[1]),
-             .loc = {.x = stof(row[2]),
-                     .y = stof(row[3]),
-                     .theta = stof(row[4])}};
+        // No bot_id anymore
+        assert(row.size() == 4);
+        p = {.reading = stof(row[0]),
+             .loc = {.x = stof(row[1]),
+                     .y = stof(row[2]),
+                     .theta = stof(row[3])}};
         if (p.reading != 0)
             readings.push_back(p);
     }
