@@ -36,7 +36,7 @@ std::vector<payload> readCSV(char *filename)
     return readings;
 }
 
-void addVotes(std::vector<payload> readings, int lineThresh, int pointThresh)
+void doHough(std::vector<payload> readings, int lineThresh, int pointThresh)
 {
     std::vector<float> maxVal(2), res(2);
     std::vector<float> vote(2);
@@ -75,7 +75,7 @@ void addVotes(std::vector<payload> readings, int lineThresh, int pointThresh)
         }
     }
     std::vector< std::vector<float> > lineF (linespace.getMaxima(lineThresh));
-    ofstream fout ("points.txt");
+    std::ofstream fout ("points.txt");
     for (auto &p: lineF) {
         for (auto &q: p) {
             fout << q << " ";
