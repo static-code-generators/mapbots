@@ -8,10 +8,25 @@ BUILDDIR=build
 
 .PHONY: clean
 
-all: $(BUILDDIR)/houghmain $(BUILDDIR)/opencv | $(BUILDDIR)
+all: $(BUILDDIR)/houghmain $(BUILDDIR)/opencv $(BUILDDIR)/ekftest $(BUILDDIR)/ekfmain | $(BUILDDIR)
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
+
+$(BUILDDIR)/ekf.o: $(IDIR)/ekf.cpp $(IDIR)/ekf.hpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c $(IDIR)/ekf.cpp -o $(BUILDDIR)/ekf.o
+
+$(BUILDDIR)/ekftest.o: $(BUILDDIR)/ekf.o ekf-test.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c ekf-test.cpp -o $(BUILDDIR)/ekftest.o
+
+$(BUILDDIR)/ekftest: $(BUILDDIR)/ekf.o $(BUILDDIR)/ekftest.o | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(BUILDDIR)/ekf.o $(BUILDDIR)/ekftest.o -o $(BUILDDIR)/ekftest
+
+$(BUILDDIR)/ekfmain.o: $(BUILDDIR)/ekf.o ekf-main.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c ekf-main.cpp -o $(BUILDDIR)/ekfmain.o
+
+$(BUILDDIR)/ekfmain: $(BUILDDIR)/ekf.o $(BUILDDIR)/ekfmain.o | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(BUILDDIR)/ekf.o $(BUILDDIR)/ekfmain.o -o $(BUILDDIR)/ekfmain
 
 $(BUILDDIR)/houghmain: $(BUILDDIR)/hough.o $(BUILDDIR)/CSVRow.o $(BUILDDIR)/houghmain.o | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) $(BUILDDIR)/CSVRow.o $(BUILDDIR)/hough.o $(BUILDDIR)/houghmain.o -o $(BUILDDIR)/houghmain

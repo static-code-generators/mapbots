@@ -19,9 +19,9 @@ const int encL = 6;
 const int encR = 7;
 
 //For wheel and encoder dimensions
-const double circ = 157.07963267948965;
-const int numSlits = 30;
-const double distPerPulse = circ / numSlits;
+const double circ = 157.07963267948965; //circumferance of wheel in mm
+const int numSlits = 30; //number of slits in the wheel encoder
+const double distPerPulse = circ / numSlits; //what is the meaning of life? we do not know
 const int numSens = 8; // number of sensors used
 
 /* 
