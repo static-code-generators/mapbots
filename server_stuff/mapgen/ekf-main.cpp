@@ -6,8 +6,8 @@
 typedef ublas::identity_matrix<double> identity_matrix;
 typedef ublas::zero_matrix<double> zero_matrix;
 
-vector_of_vector_type distanceEstimator(vector_of_vector_type x);
-vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> zActual, std::vector<vector_type> motion);
+vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<vector_type> motion);
+vector_type distanceEstimator(const vector_type &x);
 
 vector_type composition(vector_type xB, vector_type xC);
 matrix_type compositionJacobian1(vector_type xB, vector_type xC);
@@ -122,10 +122,24 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
                 P(i, j) += tempProduct(i, j);
+
+        vector_type z = zActual[i];
+        matrix_type H = jacobian(distanceEstimator, x); 
+        matrix_type PHT = prod(P, ublas::trans(H)); //the product of P and H'
+        matrix_type Z = prod(H, PHT) + R;
+        matrix_type Zinv;
+        invertMatrix(Z, Zinv);
+        matrix_type K = prod(PHT, Zinv);
+        
+        x = x + prod(K, z - distanceEstimator(x));
+        matrix_type KH = prod(K, H);
+        P = prod(identity_matrix(m) - KH, P);
     }
+
+    return x;
 }
 
-vector_type distanceEstimator(vector_type x)
+vector_type distanceEstimator(const vector_type &x)
 {
     //Questions:
     //How are we differentiating between point and line features?
@@ -158,6 +172,11 @@ vector_type distanceEstimator(vector_type x)
         for (int j = 0; j < numFeatures; ++j) {
             
             //enter parameters of feature
+            //this is because the 0..2 are the botPosition
+            //so each feature takes two elements like 3..4, 5..6 and so on
+            //hence, we add 3 + 2(numFeatures before this one) to get the
+            //starting index of this feature -> r
+            //and next index -> beta
             double r = x(3 + 2*j), beta = x(3 + 2*j + 1);
 
             //minima for distance
@@ -181,7 +200,7 @@ vector_type distanceEstimator(vector_type x)
                     readingEstimate = d;
             }
         }
-        z[i] = readingEstimate;
+        z(i) = readingEstimate;
     }
 
     return z;

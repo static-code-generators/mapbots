@@ -5,6 +5,9 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 #define BOOST_UBLAS_NDEBUG
 //puts ublas out out debugging mode, probably a good idea to
@@ -24,5 +27,8 @@ matrix_type jacobian(F h, vector_type x, Args... args);
 
 template<typename T>
 bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n);
+
+template<class T>
+bool invertMatrix(const ublas::matrix<T>& input, ublas::matrix<T>& inverse);
 
 #include "ekf.tpp"
