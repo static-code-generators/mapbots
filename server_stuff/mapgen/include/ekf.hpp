@@ -3,6 +3,8 @@
 #include <iostream>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/vector_proxy.hpp>
 
 #define BOOST_UBLAS_NDEBUG
 //puts ublas out out debugging mode, probably a good idea to
@@ -30,6 +32,9 @@ template <typename F, typename... Args>
  * @return a m * n matrix_of_matrix_type where m is the dimension of the output of h, and n is the dimension of x. Notice, that since x may be a vector of vectors, each element of the returned value is not a scalar, it is a matrix <double>. 
  */
 matrix_of_matrix_type jacobian(F h, vector_of_vector_type x, Args... args);
+
+template <typename F, typename... Args>
+matrix_type jacobian(F h, vector_type x, Args... args);
 
 template<typename T>
 bool operator==(const ublas::matrix<T>& m, const ublas::matrix<T>& n);

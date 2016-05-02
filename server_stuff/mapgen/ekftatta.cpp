@@ -24,7 +24,7 @@ int main()
 
 }
 
-vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<vector_type> motion)
+vector_of_vector_type filter(vector_of_vector_type x, std::vector<vector_of_vector_type> zActual, std::vector<vector_type> motion)
 {
     //the first argument is the vector we are trying to predict
     //the second argument is the series of measurements of the ultrasonic sensors
@@ -33,30 +33,33 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
     //here we implement the extended kalman filter.
     //(insert attribution to original paper here)
 
-    int m = x.size();
+    int m = x.size(); //number of features + 1(position of bot)
+
+    //x[0] is bot position, hence a 3-vector.
+    assert(x[0].size() == 3);
+    //x[1 ... m - 1] are features, hence 2-vectors.
+    for (int i = 1; i < m; ++i)
+        assert(x[i].size() == 2);
 
     //covariance matrix:
     //possible optimisation -> use ublas::sparse_matrix instead, since
     //a lot of the entries here are 0.
-    matrix_type P(m, m);
+    matrix_of_matrix_type P(m, m);
     //we are certain of the bot's original position (since it is the base reference)
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-            P(i, j) = 0;
+    P(0, 0) = zero_matrix(3, 3);
     //we are very uncertain of the feature's locations
-    for (int i = 3; i < m; i += 2)
-        for (int j = i; j < i + 2; ++j)
-            P(i, j) = 42696942.53008;
+    for (int i = 1; i < m; ++i)
+        P(i, i) = matrix_type(2, 2, 42696942.1);
     
     //covariance of white noise
     //in measurement of x
-    matrix_type Q(m, m);
+    matrix_of_matrix_type Q(m, m);
     for (int i = 0; i < m; ++i)
         for (int j = 0; j < m; ++j)
             if (i == j)
-                Q(i, j) = 1;
+                Q(i, j) = identity_matrix(x[i].size());
             else
-                Q(i, j) = 0;
+                Q(i, j) = zero_matrix(x[i].size(), x[j].size());
     //on-diagonal entries become identity
     //off-diagonal entries become 0 matrix
     //TODO: tune using actual readings and adventures.
@@ -70,16 +73,19 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
     //(it's actually 8, we're simulating 24 by using a servo,
     //but shoo)
     int s = 24; //unhelpful variable name, sue me.
-    matrix_type R(s, s);
-    // R is no longer an asshole, see file history to know how it was.
+    matrix_of_matrix_type R(s, s);
+    //R is a real MVP tbh, since it is the only matrix which 
+    //is actually a matrix of scalars. 
+    //but because the other matrices are assholes, R has to be an asshole
+    //too. hence, R is a matrix of 1x1 matrices :'(
     //TODO: find variance of sensors by experiment, and change R to have those.
     //R is actually just the variance of the error of the ultrasonic sensors.
     for (int i = 0; i < s; ++i)
         for (int j = 0; j < s; ++j)
             if (i == j)
-                R(i, j) = 1;
+                R(i, j) = identity_matrix(1);
             else
-                R(i, j) = 0;
+                R(i, j) = zero_matrix(1, 1);
 
     //after all of this nonsense, we are finally ready to start
     //executing the filter.
@@ -87,45 +93,36 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
     //psyche!
     //there is actually some more nonsense
 
+    //the people in the paper have added the wrong dimensions for G
+    //maybe they were high.
+    //unless I have the wrong dimensions for Q.
+    //(which is possible) TODO: check if I messed up.
     //these matrices are used in the predict step.
-    matrix_type F(m, m);
-    vector_type G(m, 0);
+    matrix_of_matrix_type F(m, m), G(m, m);
     for (int i = 0; i < m; ++i)
-        for (int j = 0; j < m; ++j)
+        for (int j = 0; j < m; ++j) {
+            G(i, j) = F(i, j) = zero_matrix(x[i].size(), x[j].size());
             if (i == j)
-                F(i, j) = 1;
+                F(i, j) = identity_matrix(x[i].size(), x[i].size());
+        }
     //why do we have these specific values for G(i, j) and F(i, j)?
-    //this is a difficult question we choose not to answer. fuck off.
+    //this is a difficult question we choose not to answer.
 
     //the lies are over, this is the filter, I swear.
     int k = zActual.size();
     for (int i = 0; i < k; ++i) {
-        vector_type botPos = ublas::subrange(x, 0, 3);
-        matrix_type J1 = compositionJacobian1(botPos, motion[i]);
-        matrix_type J2 = compositionJacobian2(botPos, motion[i]);
-        botPos = composition(botPos, motion[i]);
+        F(0, 0) = compositionJacobian1(x[0], motion[i]);
+        G(0, 0) = compositionJacobian2(x[0], motion[i]);
+        x[0] = composition(x[0], motion[i]);
 
-        matrix_type Q00(3, 3);
-        for (int i = 0; i < 3; ++i)
-            for (int j = 0; j < 3; ++j)
-                Q00(i, j) = Q(i, j);
-
-        assert(J1.size1() == 3 && J1.size2() == 3);
-        for (int i = 0; i < 3; ++i)
-            for (int j = 0; j < 3; ++j)
-                F(i, j) = J1(i, j);
-
-        matrix_type FP = prod(F, P);
-        P = prod(FP, ublas::trans(F));
-        matrix_type J2Q = prod(J2, Q);
-        matrix_type tempProduct = prod(J2Q, ublas::trans(J2));
-        for (int i = 0; i < 3; ++i)
-            for (int j = 0; j < 3; ++j)
-                P(i, j) += tempProduct(i, j);
+        //I hope this works. If anything breaks, check here first.
+        //the function prod_local is in include/ekf.{h,c}pp
+        P = prod_local(prod_local(F, P), ublas::trans(F));
+        P += prod_local(prod_local(G, Q), ublas::trans(G));
     }
 }
 
-vector_type distanceEstimator(vector_type x)
+vector_of_vector_type distanceEstimator(vector_of_vector_type x)
 {
     //Questions:
     //How are we differentiating between point and line features?
@@ -134,8 +131,8 @@ vector_type distanceEstimator(vector_type x)
     //  * make x so that the first k entries are points, the rest are lines, pass k as a parameter.
 
     //we assume that the position of the bot is a 3-vector
-    //and is stored in x(0..2)
-    vector_type botPos = ublas::subrange(x, 0, 3);
+    //and is stored in x(0)
+    vector_type botPos = x[0];
 
     //we assume that our bot has 24 sensors, placed 
     //evenly starting at 0 radian (wrt current bot orientation)
@@ -145,20 +142,21 @@ vector_type distanceEstimator(vector_type x)
     double angleIncr = 2 * M_PI / 8;
 
     //we store the distances we estimate for each sensor here.
+    //notice that z is a vector of 1-dimensional vectors
+    //this is because of the type requirements of the jacobian computer
     const int numSensors = 24;
-    vector_type z(numSensors, 0);
-    int numFeatures = (x.size() - 3) >> 1;
+    vector_of_vector_type z(numSensors, vector_type(1, 0));
 
-    double x1 = botPos(0), y1 = botPos(1), alpha = botPos(2);
+    double x1 = botPos[0], y1 = botPos[1], alpha = botPos[2];
     for (int i = 0; i < numSensors; ++i) {
         double readingEstimate = 0;
         //note that j iterates from 1 to x.size() - 1
         //since the position of the bot is stored in the x[0]
         //for now, we assume only line features
-        for (int j = 0; j < numFeatures; ++j) {
+        for (int j = 1; j < x.size(); ++j) {
             
             //enter parameters of feature
-            double r = x(3 + 2*j), beta = x(3 + 2*j + 1);
+            double r = x[j][0], beta = x[j][1];
 
             //minima for distance
             double theta = -alpha + atan(tan(beta));
@@ -181,7 +179,8 @@ vector_type distanceEstimator(vector_type x)
                     readingEstimate = d;
             }
         }
-        z[i] = readingEstimate;
+        //this is because z is a vector of 1-vectors
+        z[i][0] = readingEstimate;
     }
 
     return z;
