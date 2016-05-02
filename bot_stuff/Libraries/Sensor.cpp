@@ -1,8 +1,6 @@
 #include "Constants.h"
 #include "Sensor.h"
 
-float singleSensorReading(int sensor);
-
 void scanAll(float distCm[])
 {
     int i;

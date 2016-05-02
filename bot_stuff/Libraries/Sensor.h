@@ -5,5 +5,6 @@
 #define READ_SENSOR_H
 
 void scanAll(float distCm[]);
+float singleSensorReading(int sensor);
 
 #endif
