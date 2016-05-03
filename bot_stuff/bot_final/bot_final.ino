@@ -92,7 +92,7 @@ void loop()
     straightLineDist += unitDist;
     takeMultipleReadings();
     myservo.write(0);
-    obstacleFound = (distMatrix[0][1] != 0) && (distMatrix[0][1] < obstacleAvoidDist);
+    obstacleFound = obstacleHaiKya();
     sendReadings();
     delay(500);
 }
