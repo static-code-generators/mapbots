@@ -1,0 +1,3 @@
+80 to 100 for lines
+doesn't matter for points, we aren't plotting them
+since they are so ugly and useless.

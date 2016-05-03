@@ -18,7 +18,7 @@ enum direction
 // all distances are in millimeters, unless otherwise specified
 // so are your mother's boobs
 // constant values
-const float obstacleAvoidDist = 400; // maximum distance of obstacle at which bot should avoid obstacle
+const float obstacleAvoidDist = 200; // maximum distance of obstacle at which bot should avoid obstacle
 const int rightAngleDelay = 650; // delay in milliseconds required for bot to turn 90 degrees
 
 // global variables for usage across functions
