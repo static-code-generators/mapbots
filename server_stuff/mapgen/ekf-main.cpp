@@ -2,11 +2,13 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include "CSVRow.h"
+#include "payload.h"
 
 typedef ublas::identity_matrix<double> identity_matrix;
 typedef ublas::zero_matrix<double> zero_matrix;
 
-vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<vector_type> motion);
+vector_type filter(vector_type &x, std::vector<vector_type> &zActual, std::vector<vector_type> &motion);
 vector_type distanceEstimator(const vector_type &x);
 
 vector_type composition(vector_type xB, vector_type xC);
@@ -19,12 +21,48 @@ T square(T x)
     return x * x;
 }
 
-int main()
-{
+vector_type readFeatures(char *filename);
+std::vector<payload> readCSV(char *filename);
 
+int main(int argc, char **argv)
+{
+    assert(argc == 3);
+    std::vector<payload> readings = readCSV(argv[1]);
+    vector_type x = readFeatures(argv[2]);
+
+    std::vector<vector_type> z;
+    std::vector<vector_type> motion;
+    vector_type currPos(3, 0);
+
+    while(readings.size() % 24)
+        readings.pop_back();
+    for (int i = 0; i < readings.size(); i += 24) {
+        vector_type zCurr(24, 0);
+        for (int j = 0; j < 24; ++j) {
+            assert(i + j < readings.size());
+            zCurr(j) = readings[i + j].reading;
+        }
+
+        vector_type nextPos(3, 0);
+        nextPos(0) = readings[i].loc.x;
+        nextPos(1) = readings[i].loc.y;
+        nextPos(2) = readings[i].loc.theta;
+
+        z.push_back(zCurr);
+        motion.push_back(nextPos - currPos);
+
+        currPos = nextPos;
+    }
+
+    x = filter(x, z, motion);
+
+    std::ofstream fout("features-filtered.txt");
+    for (int i = 3; i < x.size(); i += 2) {
+        fout << x(i) << ' ' << x(i + 1) << std::endl;
+    }
 }
 
-vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<vector_type> motion)
+vector_type filter(vector_type &x, std::vector<vector_type> &zActual, std::vector<vector_type> &motion)
 {
     //the first argument is the vector we are trying to predict
     //the second argument is the series of measurements of the ultrasonic sensors
@@ -50,15 +88,7 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
     
     //covariance of white noise
     //in measurement of x
-    matrix_type Q(m, m);
-    for (int i = 0; i < m; ++i)
-        for (int j = 0; j < m; ++j)
-            if (i == j)
-                Q(i, j) = 1;
-            else
-                Q(i, j) = 0;
-    //on-diagonal entries become identity
-    //off-diagonal entries become 0 matrix
+    matrix_type Q = 10 * identity_matrix(m);
     //TODO: tune using actual readings and adventures.
     //note that this is essentially the variance of the 
     //odometer's error.
@@ -70,16 +100,10 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
     //(it's actually 8, we're simulating 24 by using a servo,
     //but shoo)
     int s = 24; //unhelpful variable name, sue me.
-    matrix_type R(s, s);
+    matrix_type R = 10 * identity_matrix(s);
     // R is no longer an asshole, see file history to know how it was.
     //TODO: find variance of sensors by experiment, and change R to have those.
     //R is actually just the variance of the error of the ultrasonic sensors.
-    for (int i = 0; i < s; ++i)
-        for (int j = 0; j < s; ++j)
-            if (i == j)
-                R(i, j) = 1;
-            else
-                R(i, j) = 0;
 
     //after all of this nonsense, we are finally ready to start
     //executing the filter.
@@ -117,7 +141,7 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
 
         matrix_type FP = prod(F, P);
         P = prod(FP, ublas::trans(F));
-        matrix_type J2Q = prod(J2, Q);
+        matrix_type J2Q = prod(J2, Q00);
         matrix_type tempProduct = prod(J2Q, ublas::trans(J2));
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
@@ -125,15 +149,15 @@ vector_type filter(vector_type x, std::vector<vector_type> zActual, std::vector<
 
         vector_type z = zActual[i];
         matrix_type H = jacobian(distanceEstimator, x); 
-        matrix_type PHT = prod(P, ublas::trans(H)); //the product of P and H'
-        matrix_type Z = prod(H, PHT) + R;
-        matrix_type Zinv;
+        matrix_type PH = prod(P, H); //the product of P and H'
+        matrix_type Z = prod(ublas::trans(H), PH) + R;
+        matrix_type Zinv(s, s);
         invertMatrix(Z, Zinv);
-        matrix_type K = prod(PHT, Zinv);
+        matrix_type K = prod(PH, Zinv);
         
         x = x + prod(K, z - distanceEstimator(x));
-        matrix_type KH = prod(K, H);
-        P = prod(identity_matrix(m) - KH, P);
+        matrix_type KHT = prod(K, ublas::trans(H));
+        P = prod(identity_matrix(m) - KHT, P);
     }
 
     return x;
@@ -313,4 +337,39 @@ matrix_type compositionJacobian2(vector_type xB, vector_type xC)
     //and seriously, we did derive these.
 
     return J;
+}
+
+vector_type readFeatures(char *filename)
+{
+    std::ifstream fin (filename);
+    //initial position vector of bot.
+    std::vector<double> temp(3, 0);
+    double val;
+    while (fin >> val)
+        temp.push_back(val);
+
+    vector_type x(temp.size());
+    for (int i = 0; i < temp.size(); ++i)
+        x(i) = temp[i];
+    
+    return x;
+}
+
+std::vector<payload> readCSV(char *filename)
+{
+    std::ifstream fin (filename);
+    CSVRow row;
+    payload p;
+    std::vector<payload> readings;
+    while (fin >> row)
+    {
+        // No bot_id anymore
+        assert(row.size() >= 4);
+        p = {.reading = stof(row[0]),
+             .loc = {.x = stof(row[1]),
+                     .y = stof(row[2]),
+                     .theta = stof(row[3])}};
+        readings.push_back(p);
+    }
+    return readings;
 }
