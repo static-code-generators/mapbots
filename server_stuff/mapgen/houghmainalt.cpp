@@ -5,9 +5,6 @@
 #include <fstream>
 #include <cassert>
 #include <cmath>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <functional>
 
 #define RHO 0
 #define THETA 1
@@ -44,8 +41,14 @@ std::vector< std::pair< std::pair<float, float>, std::pair<float, float> > > get
 {
     std::vector< std::pair< std::pair<float, float>, std::pair<float, float> > > ans;
     for (auto &line : maxima) {
-        auto xy = std::minmax_element(line.second.begin(), line.second.end());
-        ans.push_back(std::make_pair(std::make_pair((*xy.first)[X], (*xy.first)[Y]), std::make_pair((*xy.second)[X], (*xy.second)[Y])));
+        std::pair<float, float> minXY = {line.second[0][0], line.second[0][1]}, maxXY = minXY;
+        for (auto &vote : line.second) {
+            if (vote[0] < minXY.first)
+                minXY = {vote[0], vote[1]};
+            else if (vote[0] > maxXY.first)
+                maxXY = {vote[0], vote[1]};
+        }
+        ans.push_back({minXY, maxXY});
     }
     return ans;
 }
@@ -82,8 +85,8 @@ void doHough(std::vector<payload> readings, int lineThresh, int pointThresh)
             }
             vote[RHO] = std::abs(p.reading + (p.loc.x * cosf(vote[THETA]))
                     + (p.loc.y * sinf(vote[THETA])));
-            voteLoc[X] = vote[RHO] * cosf(vote[THETA]);
-            voteLoc[Y] = vote[RHO] * sinf(vote[THETA]);
+            voteLoc[X] = p.loc.x + p.reading * cosf(vote[THETA]);
+            voteLoc[Y] = p.loc.y + p.reading * sinf(vote[THETA]);
             assert(vote[RHO] <= maxVal[RHO]);
             assert(vote[THETA] <= maxVal[THETA]);
             PPRINT(vote[RHO]);
