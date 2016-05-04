@@ -9,7 +9,7 @@ import numpy as np
 import argparse
 import sys
 
-from math import sin, cos, tan
+from math import sin, cos, tan, atan
 from decimal import Decimal
 
 def line_function_creator(rho, theta):
@@ -68,8 +68,6 @@ def plotlinesegs(f, plt):
     x1 y1 x2 y2
     draws the line from (x1, y1) to (x2, y2)
     plt: matplotlib.pyplot module
-    x_range: Plot range of x-axis (min, max)
-    y_range: Plot range of y-axis (min, max)
     """
     for ls in f:
         x1, y1, x2, y2 = map(float, ls.split())
@@ -81,8 +79,11 @@ def plotlinesegs(f, plt):
             X = X[:-1]
         while len(Y) > len(X):
             Y = Y[:-1]
-
         plt.plot(X, Y)
+        m = (y2 - y1) / (x2 - x1)
+        theta = atan(-1 / m)
+        print theta
+
             
 def main():
     program_desc ="""Plot lines (Hesse normal form) and points (Cartesian coordinates)"""
