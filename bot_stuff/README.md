@@ -15,5 +15,5 @@ by server-side code.
 
 ## Hardware
 
-![schematic](https://3.bp.blogspot.com/-9X0Zeg9Yaig/Vyf9BvbrNTI/AAAAAAAAEew/NfobdMTVeGY3W1fpQS2nMPPd8JefnnlbgCLcB/s1600/photo_2016-05-03_06-50-50.jpg)
-![bot](https://3.bp.blogspot.com/-ZeWhXZpw8ys/Vyfc2ddf4MI/AAAAAAAAEeE/55zDGMC1nWMUJPjn8B_DkksUMb3HbMGSQCLcB/s1600/photo_2016-05-03_04-31-10.jpg)
+<img src="https://3.bp.blogspot.com/-9X0Zeg9Yaig/Vyf9BvbrNTI/AAAAAAAAEew/NfobdMTVeGY3W1fpQS2nMPPd8JefnnlbgCLcB/s1600/photo_2016-05-03_06-50-50.jpg" alt="schematic" height="500">
+<img src="https://3.bp.blogspot.com/-ZeWhXZpw8ys/Vyfc2ddf4MI/AAAAAAAAEeE/55zDGMC1nWMUJPjn8B_DkksUMb3HbMGSQCLcB/s1600/photo_2016-05-03_04-31-10.jpg" alt="bot" height="400">
