@@ -8,7 +8,7 @@ BUILDDIR=build
 
 .PHONY: clean
 
-all: $(BUILDDIR)/houghmainalt $(BUILDDIR)/houghmain $(BUILDDIR)/opencv $(BUILDDIR)/ekftest $(BUILDDIR)/ekfmain | $(BUILDDIR)
+all: $(BUILDDIR)/houghmainalt $(BUILDDIR)/houghmain $(BUILDDIR)/opencvalt $(BUILDDIR)/opencv $(BUILDDIR)/ekftest $(BUILDDIR)/ekfmain | $(BUILDDIR)
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -39,6 +39,12 @@ $(BUILDDIR)/houghmainalt: $(BUILDDIR)/houghalt.o $(BUILDDIR)/CSVRow.o $(BUILDDIR
 
 $(BUILDDIR)/houghmainalt.o: houghmainalt.cpp | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) -c houghmainalt.cpp -o $(BUILDDIR)/houghmainalt.o
+
+$(BUILDDIR)/opencvalt: $(BUILDDIR)/houghalt.o $(BUILDDIR)/opencvalt.o | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/houghalt.o $(BUILDDIR)/opencvalt.o -o $(BUILDDIR)/opencvalt
+
+$(BUILDDIR)/opencvalt.o: opencvalt.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` -c opencvalt.cpp -o $(BUILDDIR)/opencvalt.o
 
 $(BUILDDIR)/opencv: $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs opencv` $(BUILDDIR)/hough.o $(BUILDDIR)/opencv.o -o $(BUILDDIR)/opencv
