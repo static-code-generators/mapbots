@@ -9,7 +9,7 @@ import numpy as np
 import argparse
 import sys
 
-from math import sin, cos, tan
+from math import sin, cos, tan, atan
 from decimal import Decimal
 
 def line_function_creator(rho, theta):
@@ -63,9 +63,34 @@ def plotpoints(f, plt, x_range=(0, 100), y_range=(0, 100)):
         if (minX <= coord[0] <= maxX) and (minY <= coord[1] <= maxY):
             plt.plot(coord[0], coord[1], 'ro')
 
+def plotlinesegs(f, plt):
+    """ plots line segments, reads from f until eof in format:
+    x1 y1 x2 y2
+    draws the line from (x1, y1) to (x2, y2)
+    plt: matplotlib.pyplot module
+    """
+    for ls in f:
+        x1, y1, x2, y2 = map(float, ls.split())
+        if x1 > x2:
+            x1, y1, x2, y2 = x2, y2, x1, y1
+        X = np.arange(x1, x2, 0.2)
+        Y = np.arange(y1, y2, (y2 - y1) / len(X))
+        while len(X) > len(Y):
+            X = X[:-1]
+        while len(Y) > len(X):
+            Y = Y[:-1]
+        plt.plot(X, Y)
+        m = (y2 - y1) / (x2 - x1)
+        theta = atan(-1 / m)
+        print theta
+
+            
 def main():
     program_desc ="""Plot lines (Hesse normal form) and points (Cartesian coordinates)"""
     parser = argparse.ArgumentParser(description=program_desc)
+    parser.add_argument('-s', '--linesegfile',
+            help='File from which to read line segments',
+            type=argparse.FileType('r'))
     parser.add_argument('-l', '--linefile',
             help='File from which to read lines',
             type=argparse.FileType('r'))
@@ -88,8 +113,8 @@ def main():
             help='Maximum value to plot on Y-axis (default = 100)',
             type=int, default=100)
     args = parser.parse_args()
-    if args.pointfile == None and args.linefile == None:
-        parser.error('one of the following arguments are required: LINEFILE POINTFILE')
+    if args.pointfile == None and args.linefile == None and args.linesegfile == None:
+        parser.error('one of the following arguments are required: LINESEGFILE LINEFILE POINTFILE')
     x_range = (args.xmin, args.xmax)
     y_range = (args.ymin, args.ymax)
     if args.linefile != None:
@@ -98,6 +123,9 @@ def main():
     if args.pointfile != None:
         p = args.pointfile
         plotpoints(p, plt, x_range, y_range)
+    if args.linesegfile != None:
+        ls = args.linesegfile
+        plotlinesegs(ls, plt)
     plt.savefig(args.outfile.name)
     print('Saved output to %s' % (args.outfile.name))
 
