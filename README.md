@@ -4,9 +4,9 @@ An army of midget bots for mapping an indoor area.
 
 We've referred to [these][1] [two][2] sources extensively for implementing the algorithm. Thanks!
 
-* `examples/`: Outputs of running our bot and algorithm on different sample spaces
-* `bot_stuff/`: Bot-side code and schematics
-* `server_stuff/`: Server-side code for the map generation algorithm(s)
+* [`examples/`](https://github.com/static-code-generators/mapbots/tree/master/examples): Outputs of running our bot and algorithm on different sample spaces
+* [`bot_stuff/`](https://github.com/static-code-generators/mapbots/tree/master/bot_stuff): Bot-side code and schematics
+* [`server_stuff/`](https://github.com/static-code-generators/mapbots/tree/master/server_stuff): Server-side code for the map generation algorithm(s)
 
 Go to the above sub-directories for more details!
 
